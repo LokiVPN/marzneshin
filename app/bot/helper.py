@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import logging
 
 from aiogram.utils.payload import decode_payload, encode_payload
@@ -27,8 +28,8 @@ def get_or_create_user(
             username=tg_user.username,
             is_telegram_premium=tg_user.is_premium,
             service_ids=[service.id for service in services],
-            usage_duration=86400,  # TODO: Get from env
-            expire_strategy=UserExpireStrategy.START_ON_FIRST_USE,
+            expire_strategy=UserExpireStrategy.FIXED_DATE,
+            expire_date=datetime.utcnow() + timedelta(days=2),  # TODO: Get from env
             data_limit=500 * 1024 * 1024 * 1024,  # TODO: Get from env
             data_limit_reset_strategy=UserDataUsageResetStrategy.month,
         )
