@@ -19,7 +19,7 @@ export const ServiceInboundsTable: FC<ServiceInboundsTableProps> = ({
     const { t } = useTranslation();
 
     const handleApply = useCallback(() => {
-        updateService({ id: service.id, name: service.name, inbound_ids: selectedInbound });
+        updateService({ id: service.id, name: service.name, inbound_ids: selectedInbound, is_public: service.is_public });
     }, [selectedInbound, service, updateService]);
 
     const disabled = Object.keys(selectedRow).length < 1;

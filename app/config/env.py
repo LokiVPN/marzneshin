@@ -37,6 +37,7 @@ SUBSCRIPTION_URL_PREFIX = config("SUBSCRIPTION_URL_PREFIX", default="").strip(
 )
 
 TELEGRAM_API_TOKEN = config("TELEGRAM_API_TOKEN", default="")
+TELEGRAM_PAYMENT_TOKEN = config("TELEGRAM_PAYMENT_TOKEN", default="")
 TELEGRAM_ADMIN_ID = config(
     "TELEGRAM_ADMIN_ID",
     default="",

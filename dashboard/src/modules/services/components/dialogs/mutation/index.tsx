@@ -15,10 +15,11 @@ import {
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { useMutationDialog, MutationDialogProps } from "@marzneshin/common/hooks";
-import { NameField, InboundsField } from "./fields";
+import { NameField, InboundsField, IsPublic } from "./fields";
 
 export const ServiceSchema = z.object({
     id: z.number().optional(),
+    is_public: z.boolean(),
     inbound_ids: z.array(z.number()).refine((value) => value.some((item) => item), {
         message: "You have to select at least one inbound.",
     }),
@@ -31,6 +32,7 @@ export const MutationDialog: FC<MutationDialogProps<ServiceType>> = ({
 }) => {
     const defaultValue = useMemo(() => ({
         name: "",
+        is_public: false,
         inbound_ids: [],
     }), []);
     const updateMutation = useServicesUpdateMutation();
@@ -58,6 +60,7 @@ export const MutationDialog: FC<MutationDialogProps<ServiceType>> = ({
                 <Form {...form}>
                     <form onSubmit={handleSubmit} className="h-full">
                         <NameField />
+                        <IsPublic />
                         <InboundsField />
                         <Button
                             className="mt-3 w-full font-semibold"

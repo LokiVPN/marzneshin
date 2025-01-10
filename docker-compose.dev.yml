@@ -3,14 +3,17 @@ services:
     build: .
     restart: always
     env_file: .env
+    ports:
+      - "8000:8000"
     volumes:
-      - /var/lib/marzneshin:/var/lib/marzneshin
+      - ./:/app
+
 
   marznode:
     image: dawsh/marznode:latest
     restart: always
     environment:
-      SERVICE_ADDRESS: "127.0.0.1"
+      SERVICE_ADDRESS: "0.0.0.0"
       INSECURE: "True"
       XRAY_EXECUTABLE_PATH: "/usr/local/bin/xray"
       XRAY_ASSETS_PATH: "/usr/local/lib/xray"
@@ -18,4 +21,4 @@ services:
       SSL_KEY_FILE: "./server.key"
       SSL_CERT_FILE: "./server.cert"
     volumes:
-      - /var/lib/marznode:/var/lib/marznode
+      - ./var/lib/marznode:/var/lib/marznode

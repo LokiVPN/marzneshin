@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from app.config import NOTIFY_DAYS_LEFT
 from app.db import GetDB
@@ -24,7 +24,7 @@ async def expire_days_reached():
       log the event and trigger a notification.
     """
 
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     cleft = timedelta(days=NOTIFY_DAYS_LEFT) + now
     cright = timedelta(days=NOTIFY_DAYS_LEFT, seconds=30) + now
     with GetDB() as db:

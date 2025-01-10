@@ -16,6 +16,10 @@ export const columns = (actions: ColumnActions<ServiceType>): ColumnDef<ServiceT
         header: ({ column }) => <DataTableColumnHeader title={i18n.t('name')} column={column} />,
     },
     {
+        accessorKey: "is_public",
+        header: ({ column }) => <DataTableColumnHeader title={i18n.t('is_public')} column={column} />,
+    },
+    {
         accessorKey: "users",
         header: ({ column }) => <DataTableColumnHeader title={i18n.t('users')} column={column} />,
         cell: ({ row }) => `${row.original.user_ids.length}`

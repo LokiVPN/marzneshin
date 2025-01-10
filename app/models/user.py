@@ -34,7 +34,7 @@ class UserExpireStrategy(str, Enum):
 
 
 class User(BaseModel):
-    id: int | None = None
+    id: int
     username: Annotated[
         str, StringConstraints(to_lower=True, pattern=USERNAME_REGEXP)
     ]
@@ -53,6 +53,11 @@ class User(BaseModel):
     sub_updated_at: datetime | None = Field(None)
     sub_last_user_agent: str | None = Field(None)
     online_at: datetime | None = Field(None)
+    invited_by: int | None = Field(None)
+    is_telegram_premium: bool = False
+    last_payment_at: datetime | None = Field(None)
+    last_telegram_payment_charge_id: str | None = Field(None)
+    last_provider_payment_charge_id: str | None = Field(None)
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -99,6 +104,10 @@ class UserCreate(User):
                 "data_limit": 0,
                 "data_limit_reset_strategy": "no_reset",
                 "note": "",
+                "invited_by": 1,
+                "last_payment_at": "2024-11-03T20:30:00",
+                "last_telegram_payment_charge_id": "123456789",
+                "last_provider_payment_charge_id": "123456789",
             }
         }
     )

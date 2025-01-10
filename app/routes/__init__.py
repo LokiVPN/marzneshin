@@ -1,6 +1,15 @@
 from fastapi import APIRouter
 
-from . import admin, node, service, inbounds, subscription, system, user
+from . import (
+    admin,
+    node,
+    service,
+    inbounds,
+    subscription,
+    system,
+    user,
+    telegram,
+)
 
 api_router = APIRouter()
 
@@ -11,5 +20,6 @@ api_router.include_router(inbounds.router, prefix="/api")
 api_router.include_router(subscription.router)
 api_router.include_router(system.router, prefix="/api")
 api_router.include_router(user.router, prefix="/api")
+api_router.include_router(telegram.router, prefix="/api")
 
 __all__ = ["api_router"]

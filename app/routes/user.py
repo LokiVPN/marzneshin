@@ -41,6 +41,10 @@ class UsersSortingOptions(str, Enum):
     DATA_LIMIT = "data_limit"
     EXPIRE_DATE = "expire_date"
     CREATED_AT = "created_at"
+    ID = "id"
+    IS_TELEGRAM_PREMIUM = "is_telegram_premium"
+    LAST_PAYMENT_AT = "last_payment_at"
+    INVITED_BY = "invited_by"
 
 
 user_filters = [

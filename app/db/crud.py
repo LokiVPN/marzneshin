@@ -1,7 +1,7 @@
 import json
 import secrets
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from enum import Enum
 from types import NoneType
 from typing import List, Optional, Tuple, Union
@@ -347,16 +347,20 @@ def get_user_by_id(db: Session, user_id: int):
 UsersSortingOptions = Enum(
     "UsersSortingOptions",
     {
+        "id": User.id.asc(),
         "username": User.username.asc(),
         "used_traffic": User.used_traffic.asc(),
         "data_limit": User.data_limit.asc(),
         "expire": User.expire_date.asc(),
         "created_at": User.created_at.asc(),
+        "last_payment_at": User.last_payment_at.asc(),
+        "-id": User.id.desc(),
         "-username": User.username.desc(),
         "-used_traffic": User.used_traffic.desc(),
         "-data_limit": User.data_limit.desc(),
         "-expire": User.expire_date.desc(),
         "-created_at": User.created_at.desc(),
+        "-last_payment_at": User.last_payment_at.desc(),
     },
 )
 
@@ -365,6 +369,7 @@ def get_users(
     db: Session,
     offset: Optional[int] = None,
     limit: Optional[int] = None,
+    ids: Optional[List[int]] = None,
     usernames: Optional[List[str]] = None,
     sort: Optional[List[UsersSortingOptions]] = None,
     admin: Optional[Admin] = None,
@@ -379,6 +384,9 @@ def get_users(
     enabled: bool | None = None,
 ) -> Union[List[User], Tuple[List[User], int]]:
     query = db.query(User).filter(User.removed == False)
+
+    if ids:
+        query = query.filter(User.id.in_(ids))
 
     if usernames:
         if len(usernames) == 1:
@@ -597,11 +605,11 @@ def get_users_count(
         query = query.filter(User.enabled == enabled)
     if online is True:
         query = query.filter(
-            User.online_at > (datetime.utcnow() - timedelta(seconds=30))
+            User.online_at > (datetime.now(UTC) - timedelta(seconds=30))
         )
     elif online is False:
         query = query.filter(
-            User.online_at < (datetime.utcnow() - timedelta(seconds=30))
+            User.online_at < (datetime.now(UTC) - timedelta(seconds=30))
         )
     if expire_strategy:
         query = query.filter(User.expire_strategy == expire_strategy)
@@ -621,6 +629,7 @@ def create_user(
         else user.service_ids
     )
     dbuser = User(
+        id=user.id,
         username=user.username,
         key=user.key,
         expire_strategy=user.expire_strategy,
@@ -634,6 +643,8 @@ def create_user(
         admin=admin,
         data_limit_reset_strategy=user.data_limit_reset_strategy,
         note=user.note,
+        invited_by=user.invited_by,
+        is_telegram_premium=user.is_telegram_premium,
     )
     db.add(dbuser)
     db.commit()
@@ -686,6 +697,12 @@ def update_user(
     if modify.usage_duration is not None:
         dbuser.usage_duration = modify.usage_duration
 
+    if modify.username is not None:
+        dbuser.username = modify.username
+
+    if modify.is_telegram_premium is not None:
+        dbuser.is_telegram_premium = modify.is_telegram_premium
+
     if modify.service_ids is not None:
         if allowed_services is not None:
             service_ids = [
@@ -697,7 +714,7 @@ def update_user(
         dbuser.services = (
             db.query(Service).filter(Service.id.in_(service_ids)).all()
         )
-    dbuser.edit_at = datetime.utcnow()
+    dbuser.edit_at = datetime.now(UTC)
 
     db.commit()
     db.refresh(dbuser)
@@ -705,7 +722,7 @@ def update_user(
 
 
 def reset_user_data_usage(db: Session, dbuser: User):
-    dbuser.traffic_reset_at = datetime.utcnow()
+    dbuser.traffic_reset_at = datetime.now(UTC)
 
     dbuser.used_traffic = 0
 
@@ -716,16 +733,29 @@ def reset_user_data_usage(db: Session, dbuser: User):
     return dbuser
 
 
+def extend_user_sub(db: Session, dbuser: User, extend_time: timedelta):
+    if dbuser.expire_date is None:
+        dbuser.usage_duration += extend_time.total_seconds()
+    elif dbuser.expire_date < datetime.now(UTC):
+        dbuser.expire_date = datetime.now(UTC) + extend_time
+        dbuser.activated = True
+    else:
+        dbuser.expire_date += extend_time
+    db.commit()
+    db.refresh(dbuser)
+    return dbuser
+
+
 def revoke_user_sub(db: Session, dbuser: User):
     dbuser.key = secrets.token_hex(16)
-    dbuser.sub_revoked_at = datetime.utcnow()
+    dbuser.sub_revoked_at = datetime.now(UTC)
     db.commit()
     db.refresh(dbuser)
     return dbuser
 
 
 def update_user_sub(db: Session, dbuser: User, user_agent: str):
-    dbuser.sub_updated_at = datetime.utcnow()
+    dbuser.sub_updated_at = datetime.now(UTC)
     dbuser.sub_last_user_agent = user_agent
 
     db.commit()
@@ -808,7 +838,7 @@ def update_admin(
         if not isinstance(getattr(modifications, attribute), NoneType):
             setattr(dbadmin, attribute, getattr(modifications, attribute))
             if attribute == "hashed_password":
-                dbadmin.password_reset_at = datetime.utcnow()
+                dbadmin.password_reset_at = datetime.now(UTC)
     if isinstance(modifications.service_ids, list):
         dbadmin.services = (
             db.query(Service)
@@ -830,7 +860,7 @@ def partial_update_admin(
         and dbadmin.hashed_password != modified_admin.hashed_password
     ):
         dbadmin.hashed_password = modified_admin.hashed_password
-        dbadmin.password_reset_at = datetime.utcnow()
+        dbadmin.password_reset_at = datetime.now(UTC)
 
     db.commit()
     db.refresh(dbadmin)
@@ -862,6 +892,7 @@ def get_admins(
 def create_service(db: Session, service: ServiceCreate) -> Service:
     dbservice = Service(
         name=service.name,
+        is_public=service.is_public,
         inbounds=db.query(Inbound)
         .filter(Inbound.id.in_(service.inbound_ids))
         .all(),
@@ -881,11 +912,18 @@ def get_services(db: Session) -> List[Service]:
     return db.query(Service).all()
 
 
+def get_public_services(db: Session) -> List[Service]:
+    return db.query(Service).filter(Service.is_public == True).all()
+
+
 def update_service(
     db: Session, db_service: Service, modification: ServiceModify
 ):
     if modification.name is not None:
         db_service.name = modification.name
+
+    if modification.is_public is not None:
+        db_service.is_public = modification.is_public
 
     if modification.inbound_ids is not None:
         db_service.inbounds = (
@@ -1029,5 +1067,5 @@ def update_node_status(
     db_node.status = status
     if message:
         db_node.message = message
-    db_node.last_status_change = datetime.utcnow()
+    db_node.last_status_change = datetime.now(UTC)
     db.commit()

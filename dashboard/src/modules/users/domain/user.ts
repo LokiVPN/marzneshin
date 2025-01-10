@@ -2,6 +2,7 @@ import { DataLimitResetStrategy } from "./data-limit-reset-strategy"
 import { ExpireStrategy } from "./expire-strategy"
 
 export interface UserType {
+    id: number;
     expire_strategy: ExpireStrategy;
     usage_duration?: number | null;
     activation_deadline?: Date | string | null;
@@ -25,5 +26,9 @@ export interface UserType {
     service_ids: number[];
     note: string;
     online_at: string;
+    invited_by: number | null;
+    is_telegram_premium: boolean;
+    last_payment_at: Date | string | null;
+    last_telegram_payment_charge_id: string | null;
+    last_provider_payment_charge_id: string | null;
 }
-

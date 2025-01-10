@@ -1,6 +1,6 @@
 import os
 import secrets
-from datetime import datetime
+from datetime import datetime, UTC
 
 import sqlalchemy.sql
 from sqlalchemy import (
@@ -128,6 +128,7 @@ class Service(Base):
     __tablename__ = "services"
     id = Column(Integer, primary_key=True)
     name = Column(String(64))
+    is_public = Column(Boolean, default=False, nullable=False)
     admins = relationship(
         "Admin", secondary=admins_services, back_populates="services"
     )
@@ -215,6 +216,15 @@ class User(Base):
     online_at = Column(DateTime)
     edit_at = Column(DateTime)
 
+    is_telegram_premium = Column(Boolean, default=False)
+    # Foreign key
+    invited_by = Column(Integer, ForeignKey("users.id", name="fk_invited_by"))
+
+    # Payments
+    last_payment_at = Column(DateTime)
+    last_telegram_payment_charge_id = Column(String(64))
+    last_provider_payment_charge_id = Column(String(64))
+
     @property
     def service_ids(self):
         return [service.id for service in self.services]
@@ -222,7 +232,7 @@ class User(Base):
     @hybrid_property
     def expired(self):
         if self.expire_strategy == "fixed_date":
-            return self.expire_date < datetime.utcnow()
+            return self.expire_date < datetime.now(UTC)
         return False
 
     @expired.expression

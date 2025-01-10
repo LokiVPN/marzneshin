@@ -25,14 +25,20 @@ import { type Column } from "@tanstack/react-table";
 
 export const columns = (actions: ColumnActions<UserType>): ColumnDefWithSudoRole<UserType>[] => [
     {
-        accessorKey: "username",
+        accessorKey: "id",
         header: ({ column }) => (
-            <DataTableColumnHeader title={i18n.t("username")} column={column} />
+            <DataTableColumnHeader title={i18n.t("id")} column={column} />
         ),
         cell: ({ row }) => (
             <div className="flex flex-row gap-2 items-center">
-                <OnlineStatus user={row.original} /> {row.original.username}
+                <OnlineStatus user={row.original} /> {row.original.id}
             </div>
+        ),
+    },
+    {
+        accessorKey: "username",
+        header: ({ column }) => (
+            <DataTableColumnHeader title={i18n.t("username")} column={column} />
         ),
     },
     {

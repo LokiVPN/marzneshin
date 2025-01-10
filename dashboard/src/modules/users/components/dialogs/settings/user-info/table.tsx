@@ -50,8 +50,25 @@ export const UserInfoTable: FC<UserProp> = ({ user: entity }) => {
                 <Table>
                     <TableBody>
                         <TableRowWithCell
+                            label={t("id")}
+                            value={entity.id}
+                        />
+                        <TableRowWithCell
                             label={t("username")}
                             value={entity.username}
+                        />
+                        <TableRowWithCell
+                            label={t("inveted_by")}
+                            value={entity.invited_by}
+                        />
+                        <TableRowWithCell
+                            label={t("is_telegram_premium")}
+                            value={entity.is_telegram_premium ? "Yes" : "No"}
+                        />
+                        <DateTableRow
+                            label={t("last_payment_at")}
+                            date={entity.last_payment_at}
+                            withTime
                         />
                         <TableRowWithCell
                             label={t("activated")}
