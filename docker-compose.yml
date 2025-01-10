@@ -4,6 +4,8 @@ services:
     restart: always
     env_file: .env
     network_mode: host
+    environment:
+      SQLALCHEMY_DATABASE_URL: "sqlite:////var/lib/marzneshin/db.sqlite3"
     volumes:
       - /var/lib/marzneshin:/var/lib/marzneshin
 
