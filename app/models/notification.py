@@ -1,4 +1,4 @@
-from datetime import datetime as dt, UTC
+from datetime import datetime as dt
 from enum import Enum
 from typing import Optional
 
@@ -9,7 +9,7 @@ from app.models.user import UserResponse
 
 
 class Notification(BaseModel):
-    created_at: float = dt.now(UTC).timestamp()
+    created_at: float = dt.utcnow().timestamp()
 
 
 class AdminNotif(Notification):

@@ -1,7 +1,7 @@
 import json
 import secrets
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from types import NoneType
 from typing import List, Optional, Tuple, Union
@@ -605,11 +605,11 @@ def get_users_count(
         query = query.filter(User.enabled == enabled)
     if online is True:
         query = query.filter(
-            User.online_at > (datetime.now(UTC) - timedelta(seconds=30))
+            User.online_at > (datetime.utcnow() - timedelta(seconds=30))
         )
     elif online is False:
         query = query.filter(
-            User.online_at < (datetime.now(UTC) - timedelta(seconds=30))
+            User.online_at < (datetime.utcnow() - timedelta(seconds=30))
         )
     if expire_strategy:
         query = query.filter(User.expire_strategy == expire_strategy)
@@ -714,7 +714,7 @@ def update_user(
         dbuser.services = (
             db.query(Service).filter(Service.id.in_(service_ids)).all()
         )
-    dbuser.edit_at = datetime.now(UTC)
+    dbuser.edit_at = datetime.utcnow()
 
     db.commit()
     db.refresh(dbuser)
@@ -722,7 +722,7 @@ def update_user(
 
 
 def reset_user_data_usage(db: Session, dbuser: User):
-    dbuser.traffic_reset_at = datetime.now(UTC)
+    dbuser.traffic_reset_at = datetime.utcnow()
 
     dbuser.used_traffic = 0
 
@@ -736,8 +736,8 @@ def reset_user_data_usage(db: Session, dbuser: User):
 def extend_user_sub(db: Session, dbuser: User, extend_time: timedelta):
     if dbuser.expire_date is None:
         dbuser.usage_duration += extend_time.total_seconds()
-    elif dbuser.expire_date < datetime.now(UTC):
-        dbuser.expire_date = datetime.now(UTC) + extend_time
+    elif dbuser.expire_date < datetime.utcnow():
+        dbuser.expire_date = datetime.utcnow() + extend_time
         dbuser.activated = True
     else:
         dbuser.expire_date += extend_time
@@ -748,14 +748,14 @@ def extend_user_sub(db: Session, dbuser: User, extend_time: timedelta):
 
 def revoke_user_sub(db: Session, dbuser: User):
     dbuser.key = secrets.token_hex(16)
-    dbuser.sub_revoked_at = datetime.now(UTC)
+    dbuser.sub_revoked_at = datetime.utcnow()
     db.commit()
     db.refresh(dbuser)
     return dbuser
 
 
 def update_user_sub(db: Session, dbuser: User, user_agent: str):
-    dbuser.sub_updated_at = datetime.now(UTC)
+    dbuser.sub_updated_at = datetime.utcnow()
     dbuser.sub_last_user_agent = user_agent
 
     db.commit()
@@ -838,7 +838,7 @@ def update_admin(
         if not isinstance(getattr(modifications, attribute), NoneType):
             setattr(dbadmin, attribute, getattr(modifications, attribute))
             if attribute == "hashed_password":
-                dbadmin.password_reset_at = datetime.now(UTC)
+                dbadmin.password_reset_at = datetime.utcnow()
     if isinstance(modifications.service_ids, list):
         dbadmin.services = (
             db.query(Service)
@@ -860,7 +860,7 @@ def partial_update_admin(
         and dbadmin.hashed_password != modified_admin.hashed_password
     ):
         dbadmin.hashed_password = modified_admin.hashed_password
-        dbadmin.password_reset_at = datetime.now(UTC)
+        dbadmin.password_reset_at = datetime.utcnow()
 
     db.commit()
     db.refresh(dbadmin)
@@ -1067,5 +1067,5 @@ def update_node_status(
     db_node.status = status
     if message:
         db_node.message = message
-    db_node.last_status_change = datetime.now(UTC)
+    db_node.last_status_change = datetime.utcnow()
     db.commit()

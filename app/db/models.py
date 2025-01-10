@@ -1,6 +1,6 @@
 import os
 import secrets
-from datetime import datetime, UTC
+from datetime import datetime
 
 import sqlalchemy.sql
 from sqlalchemy import (
@@ -232,7 +232,7 @@ class User(Base):
     @hybrid_property
     def expired(self):
         if self.expire_strategy == "fixed_date":
-            return self.expire_date < datetime.now(UTC)
+            return self.expire_date < datetime.utcnow()
         return False
 
     @expired.expression
