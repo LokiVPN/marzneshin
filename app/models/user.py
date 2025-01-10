@@ -34,7 +34,7 @@ class UserExpireStrategy(str, Enum):
 
 
 class User(BaseModel):
-    id: int
+    id: int | None = None
     username: Annotated[
         str, StringConstraints(to_lower=True, pattern=USERNAME_REGEXP)
     ]
