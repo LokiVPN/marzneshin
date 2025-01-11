@@ -38,7 +38,7 @@ async def get_db_user(request: Request, db: DBDep):
         raise HTTPException(status_code=500, detail="Telegram bot is not initialized.")
 
     data = await request.form()
-    logger.debug(f"Webapp init data: {data}")
+    logger.info(f"Webapp init data: {data}")
     try:
         data = safe_parse_webapp_init_data(
             token=bot.token, init_data=data["_auth"]
@@ -55,6 +55,7 @@ TGUserDep = Annotated[User, Depends(get_db_user)]
 
 @router.post("/sub")
 async def get_user_subscription(user: TGUserDep, db: DBDep):
+    logger.info(f"User {user.id} requested subscription")
     subscription_settings = SubscriptionSettings.model_validate(
         db.query(Settings.subscription).first()[0]
     )
