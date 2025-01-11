@@ -5,21 +5,40 @@
     <title>Test Bot</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script>
-        function goToSubscription() {
+        function makeForm(action) {
             var form = document.createElement('form');
             form.style.visibility = 'hidden'; // no user interaction is necessary
             form.method = 'POST'; // forms by default use GET query strings
-            form.action = '/web/sub';
+            form.action = action;
             var input = document.createElement('input');
             input.name = "_auth";
             input.value = window.Telegram.WebApp.initData;
-            form.appendChild(input); // add key/value pair to form
+            form.appendChild(input);
+            return form;
+        }
+
+        function goToSubscription() {
+            var form = makeForm('/web/sub');
             document.body.appendChild(form); // forms cannot be submitted outside of body
             form.submit();
+        }
+
+        function getUserInfo() {
+            var dt = fetch('/web/get_me', {
+                method: 'POST',
+                body: JSON.stringify({
+                    _auth: window.Telegram.WebApp.initData
+                })
+            }).then(function(response) {
+                return response.json();
+            });
+            document.getElementById('user-info').innerText = JSON.stringify(dt, null, 2);
         }
     </script>
 </head>
 <body>
-    <button onclick="goToSubscription()">Subscribe</button>
+    <button onclick="goToSubscription()">Go to subscription</button>
+    <button onclick="getUserInfo()">Get user info</button>
+    <pre id="user-info"></pre>
 </body>
 </html>

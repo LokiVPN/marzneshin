@@ -20,6 +20,7 @@ from app.models.telegram import (
     PricesResponse,
     InviteLink,
 )
+from app.models.user import UserResponse
 from app.templates import render_template
 from app.utils.share import generate_subscription_template
 
@@ -54,6 +55,11 @@ async def get_db_user(request: Request, db: DBDep):
 TGUserDep = Annotated[User, Depends(get_db_user)]
 
 
+@router.post("/get_me", response_model=UserResponse)
+async def get_me(user: TGUserDep):
+    return user
+
+
 @router.post("/sub")
 async def get_user_subscription(user: TGUserDep, db: DBDep):
     logger.info(f"User {user.id} requested subscription")
@@ -65,7 +71,7 @@ async def get_user_subscription(user: TGUserDep, db: DBDep):
     )
 
 
-@router.get("/prices", response_model=PricesResponse)
+@router.post("/prices", response_model=PricesResponse)
 def prices(user: TGUserDep):
     """
     Get prices for the invoice
@@ -76,7 +82,7 @@ def prices(user: TGUserDep):
     }
 
 
-@router.get("/personal_link", response_model=InviteLink)
+@router.post("/personal_link", response_model=InviteLink)
 async def personal_link(user: TGUserDep):
     """
     Get a personal link for the user
