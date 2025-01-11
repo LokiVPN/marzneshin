@@ -24,11 +24,12 @@
         }
 
         function getUserInfo() {
+            let formData = new FormData();
+            formData.append('_auth', window.Telegram.WebApp.initData);
+
             var dt = fetch('/web/get_me', {
                 method: 'POST',
-                body: JSON.stringify({
-                    _auth: window.Telegram.WebApp.initData
-                })
+                body: formData
             }).then(function(response) {
                 return response.json();
             });
