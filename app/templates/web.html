@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <script>
+        function goToSubscription() {
+            var form = document.createElement('form');
+            form.style.visibility = 'hidden'; // no user interaction is necessary
+            form.method = 'POST'; // forms by default use GET query strings
+            form.action = '/web/sub';
+            var input = document.createElement('input');
+            input.name = "_auth";
+            input.value = window.Telegram.WebApp.initData;
+            form.appendChild(input); // add key/value pair to form
+            document.body.appendChild(form); // forms cannot be submitted outside of body
+            form.submit();
+        }
+    </script>
+</head>
+<body>
+    <button onclick="goToSubscription()">Subscribe</button>
+</body>
+</html>
