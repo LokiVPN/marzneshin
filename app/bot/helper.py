@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 import logging
-
 from aiogram.utils.payload import decode_payload, encode_payload
 from sqlalchemy.orm import Session
 from aiogram import types, Bot
@@ -29,7 +28,8 @@ def get_or_create_user(
             is_telegram_premium=tg_user.is_premium,
             service_ids=[service.id for service in services],
             expire_strategy=UserExpireStrategy.FIXED_DATE,
-            expire_date=datetime.utcnow() + timedelta(days=2),  # TODO: Get from env
+            expire_date=datetime.utcnow()
+            + timedelta(days=2),  # TODO: Get from env
             data_limit=500 * 1024 * 1024 * 1024,  # TODO: Get from env
             data_limit_reset_strategy=UserDataUsageResetStrategy.month,
         )
@@ -81,7 +81,7 @@ def decode_invoice_payload(payload: str) -> tuple[int, Currency, int]:
 
 
 def get_prices(currency: Currency, duration: int) -> list[types.LabeledPrice]:
-    cost_per_day = 3.5
+    cost_per_day = 3.5  # TODO: Get from env
     multiply = 100 if currency == Currency.RUB else 0.5
 
     return [
@@ -142,3 +142,14 @@ async def create_invoice(
 
     else:
         raise ValueError("Invalid currency")
+
+
+async def get_chat_info(bot: Bot, chat_id: int):
+    """
+    Get chat info by chat_id для импорта из marzban
+    """
+    try:
+        return await bot.get_chat(chat_id)
+    except Exception as e:
+        logger.error(f"Failed to get chat info: {e}")
+        return None

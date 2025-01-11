@@ -5,31 +5,28 @@ from aiogram import Dispatcher, Bot, BaseMiddleware
 from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, CommandObject
-from aiogram.types import Message, LabeledPrice
-from aiogram.utils.markdown import hbold
+from aiogram.filters import CommandStart, CommandObject, Command
+from aiogram.types import Message
 from sqlalchemy.orm import Session
 
 from app.bot.helper import get_or_create_user
+from app.bot.messages import (
+    start_message,
+    help_message,
+    terms_of_service_message,
+)
 from app.config import (
     TELEGRAM_API_TOKEN,
     TELEGRAM_PROXY_URL,
-    TELEGRAM_PAYMENT_TOKEN,
 )
 from app.db import crud, User
 from app.db import GetDB
-from app.models.user import (
-    UserCreate,
-    UserExpireStrategy,
-    UserDataUsageResetStrategy,
-)
-
 
 logger = logging.getLogger(__name__)
 dp = Dispatcher()
 
 
-class DbMiddleware(BaseMiddleware):
+class Middleware(BaseMiddleware):
     def __init__(self) -> None:
         with GetDB() as db:
             self.db = db
@@ -45,7 +42,7 @@ class DbMiddleware(BaseMiddleware):
         return await handler(event, data)
 
 
-dp.message.outer_middleware(DbMiddleware())
+dp.message.outer_middleware(Middleware())
 
 
 class BotManager:
@@ -81,7 +78,7 @@ async def command_start__deep_handler(
     if not user:
         user = get_or_create_user(db, message.from_user, command.args)
 
-    await message.answer(f"Hello deep, {hbold(user.username)}! {command.args}")
+    await message.answer(start_message(user.username))
 
 
 @dp.message(CommandStart())
@@ -94,14 +91,20 @@ async def command_start_handler(
     if not user:
         user = get_or_create_user(db, message.from_user)
 
-    link = await message.bot.create_invoice_link(
-        title="Test invoice",
-        description="Test invoice description",
-        payload="payload",
-        currency="RUB",
-        provider_token=TELEGRAM_PAYMENT_TOKEN,
-        prices=[
-            LabeledPrice(label="Test price", amount=10000),
-        ],
-    )
-    await message.answer(f"Hello, {hbold(user.username)}! {link}")
+    await message.answer(start_message(user.username))
+
+
+@dp.message(Command("help"))
+async def command_help_handler(message: Message) -> None:
+    """
+    This handler receives messages with `/help` command
+    """
+    await message.answer(help_message())
+
+
+@dp.message(Command("terms"))
+async def command_terms_handler(message: Message) -> None:
+    """
+    This handler receives messages with `/terms` command
+    """
+    await message.answer(terms_of_service_message())
