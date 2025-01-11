@@ -63,6 +63,9 @@ class BotManager:
             )
             try:
                 await cls._instance.get_me()
+                await cls._instance.set_webhook(
+                    url="https://loki-connect.ru/bot/webhook"
+                )
             except:
                 logger.error("Telegram API token is not valid.")
         return cls._instance

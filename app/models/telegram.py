@@ -13,6 +13,11 @@ class Currency(str, Enum):
     XTR = "XTR"
 
 
+class PricesResponse(BaseModel):
+    RUB: int
+    XTR: int
+
+
 class CreateInvoice(BaseModel):
     currency: Currency = Field(Currency.RUB)
     duration: Annotated[int, Field(ge=1, le=365)] = Field(1)
@@ -20,5 +25,11 @@ class CreateInvoice(BaseModel):
     is_link: bool = Field(False)
 
 
-class InvoiceLink(BaseModel):
+class Link(BaseModel):
     link: HttpUrl
+
+
+class InviteLink(Link): ...
+
+
+class InvoiceLink(Link): ...
