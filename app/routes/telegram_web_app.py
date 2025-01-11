@@ -66,7 +66,7 @@ async def get_user_subscription(user: TGUserDep, db: DBDep):
 
 
 @router.get("/prices", response_model=PricesResponse)
-def prices():
+def prices(user: TGUserDep):
     """
     Get prices for the invoice
     """
@@ -76,8 +76,8 @@ def prices():
     }
 
 
-@router.get("/{user_id}/personal_link", response_model=InviteLink)
-async def personal_link(user_id: int):
+@router.get("/personal_link", response_model=InviteLink)
+async def personal_link(user: TGUserDep):
     """
     Get a personal link for the user
     """
@@ -86,13 +86,13 @@ async def personal_link(user_id: int):
         logger.error("Telegram bot is not initialized.")
         return
 
-    start_link = await create_start_link(bot, str(user_id), encode=True)
+    start_link = await create_start_link(bot, str(user.id), encode=True)
     return InviteLink(link=start_link)
 
 
-@router.post("/{user_id}/invoice", response_model=InvoiceLink)
+@router.post("/invoice", response_model=InvoiceLink)
 async def generate_invoice(
-    user_id: int,
+    user: TGUserDep,
     db: DBDep,
     new_invoice: CreateInvoice,
 ):
@@ -105,7 +105,7 @@ async def generate_invoice(
 
     invoice_link = await create_invoice(
         bot,
-        crud.get_user_by_id(db, user_id),
+        crud.get_user_by_id(db, user.id),
         new_invoice.currency,
         new_invoice.duration,
         new_invoice.is_subscription,
