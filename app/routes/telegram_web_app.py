@@ -11,7 +11,8 @@ from app.bot.bot import BotManager
 from app.bot.helper import create_invoice, get_prices
 from app.db import crud, User
 from app.dependencies import DBDep
-from app.models.settings import SubscriptionSettings, Settings
+from app.db.models import Settings
+from app.models.settings import SubscriptionSettings
 from app.models.telegram import (
     CreateInvoice,
     InvoiceLink,
