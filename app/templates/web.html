@@ -30,9 +30,10 @@
            fetch('/web/get_me', {
                 method: 'POST',
                 body: formData
-            }).then(function(response) {
-                document.getElementById('user-info').innerText = response.text();
-            });
+            }).then(async function (response) {
+               const res = await response.json();
+               document.getElementById('user-info').innerText = JSON.stringify(res, null, 2);
+           });
         }
     </script>
 </head>
