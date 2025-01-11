@@ -57,6 +57,7 @@ TGUserDep = Annotated[User, Depends(get_db_user)]
 
 @router.post("/get_me", response_model=UserResponse)
 async def get_me(user: TGUserDep):
+    logger.info(f"User {user.id} requested his info")
     return UserResponse.model_validate(user)
 
 

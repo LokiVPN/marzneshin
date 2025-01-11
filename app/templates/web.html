@@ -27,13 +27,12 @@
             let formData = new FormData();
             formData.append('_auth', window.Telegram.WebApp.initData);
 
-            var dt = fetch('/web/get_me', {
+           fetch('/web/get_me', {
                 method: 'POST',
                 body: formData
             }).then(function(response) {
-                return response.json();
+                document.getElementById('user-info').innerText = JSON.stringify(response.json(), null, 2);
             });
-            document.getElementById('user-info').innerText = JSON.stringify(dt, null, 2);
         }
     </script>
 </head>
