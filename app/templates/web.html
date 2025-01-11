@@ -31,7 +31,7 @@
                 method: 'POST',
                 body: formData
             }).then(function(response) {
-                document.getElementById('user-info').innerText = JSON.stringify(response.json(), null, 2);
+                document.getElementById('user-info').innerText = response.text();
             });
         }
     </script>
