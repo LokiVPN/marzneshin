@@ -27,7 +27,7 @@ export async function fetchNotificationUsers({ queryKey }: DoubleEntityQueryKeyT
     });
 }
 
-const NotificationsQueryFetchKey = "notifications";
+const NotificationsQueryFetchKey = "notifications-users-fetch-key";
 
 export const useUsersNotificationQuery = ({
     notificationId, page = 1, size = 50

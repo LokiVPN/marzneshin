@@ -30,7 +30,7 @@ const handleSuccess = (value: NotificationMutationType) => {
 }
 
 
-const NotificationsStartFetchKey = "notifications";
+const NotificationsStartFetchKey = "notification-start-fetch-key";
 
 export const useNotificationStartCmd = () => {
     return useMutation({

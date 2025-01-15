@@ -16,6 +16,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as DashboardImport } from './routes/_dashboard'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as AuthLoginImport } from './routes/_auth/login'
+import { Route as DashboardUsersCreateImport } from './routes/_dashboard/users/create'
 import { Route as DashboardUsersUserIdImport } from './routes/_dashboard/users/$userId'
 import { Route as DashboardServicesCreateImport } from './routes/_dashboard/services/create'
 import { Route as DashboardServicesServiceIdImport } from './routes/_dashboard/services/$serviceId'
@@ -141,6 +142,12 @@ const AuthLoginRoute = AuthLoginImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => AuthRoute,
+} as any)
+
+const DashboardUsersCreateRoute = DashboardUsersCreateImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => DashboardUsersLazyRoute,
 } as any)
 
 const DashboardUsersUserIdRoute = DashboardUsersUserIdImport.update({
@@ -489,6 +496,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardUsersUserIdImport
       parentRoute: typeof DashboardUsersLazyImport
     }
+    '/_dashboard/users/create': {
+      id: '/_dashboard/users/create'
+      path: '/create'
+      fullPath: '/users/create'
+      preLoaderRoute: typeof DashboardUsersCreateImport
+      parentRoute: typeof DashboardUsersLazyImport
+    }
     '/_dashboard/admins/$adminId/delete': {
       id: '/_dashboard/admins/$adminId/delete'
       path: '/delete'
@@ -813,10 +827,12 @@ const DashboardUsersUserIdRouteWithChildren =
 
 interface DashboardUsersLazyRouteChildren {
   DashboardUsersUserIdRoute: typeof DashboardUsersUserIdRouteWithChildren
+  DashboardUsersCreateRoute: typeof DashboardUsersCreateRoute
 }
 
 const DashboardUsersLazyRouteChildren: DashboardUsersLazyRouteChildren = {
   DashboardUsersUserIdRoute: DashboardUsersUserIdRouteWithChildren,
+  DashboardUsersCreateRoute: DashboardUsersCreateRoute,
 }
 
 const DashboardUsersLazyRouteWithChildren =
@@ -869,6 +885,7 @@ export interface FileRoutesByFullPath {
   '/services/$serviceId': typeof DashboardServicesServiceIdRouteWithChildren
   '/services/create': typeof DashboardServicesCreateRoute
   '/users/$userId': typeof DashboardUsersUserIdRouteWithChildren
+  '/users/create': typeof DashboardUsersCreateRoute
   '/admins/$adminId/delete': typeof DashboardAdminsAdminIdDeleteRoute
   '/admins/$adminId/edit': typeof DashboardAdminsAdminIdEditRoute
   '/hosts/$hostId/delete': typeof DashboardHostsHostIdDeleteRoute
@@ -905,6 +922,7 @@ export interface FileRoutesByTo {
   '/nodes/create': typeof DashboardNodesCreateRoute
   '/notifications/create': typeof DashboardNotificationsCreateRoute
   '/services/create': typeof DashboardServicesCreateRoute
+  '/users/create': typeof DashboardUsersCreateRoute
   '/admins/$adminId/delete': typeof DashboardAdminsAdminIdDeleteRoute
   '/admins/$adminId/edit': typeof DashboardAdminsAdminIdEditRoute
   '/hosts/$hostId/delete': typeof DashboardHostsHostIdDeleteRoute
@@ -949,6 +967,7 @@ export interface FileRoutesById {
   '/_dashboard/services/$serviceId': typeof DashboardServicesServiceIdRouteWithChildren
   '/_dashboard/services/create': typeof DashboardServicesCreateRoute
   '/_dashboard/users/$userId': typeof DashboardUsersUserIdRouteWithChildren
+  '/_dashboard/users/create': typeof DashboardUsersCreateRoute
   '/_dashboard/admins/$adminId/delete': typeof DashboardAdminsAdminIdDeleteRoute
   '/_dashboard/admins/$adminId/edit': typeof DashboardAdminsAdminIdEditRoute
   '/_dashboard/hosts/$hostId/delete': typeof DashboardHostsHostIdDeleteRoute
@@ -993,6 +1012,7 @@ export interface FileRouteTypes {
     | '/services/$serviceId'
     | '/services/create'
     | '/users/$userId'
+    | '/users/create'
     | '/admins/$adminId/delete'
     | '/admins/$adminId/edit'
     | '/hosts/$hostId/delete'
@@ -1028,6 +1048,7 @@ export interface FileRouteTypes {
     | '/nodes/create'
     | '/notifications/create'
     | '/services/create'
+    | '/users/create'
     | '/admins/$adminId/delete'
     | '/admins/$adminId/edit'
     | '/hosts/$hostId/delete'
@@ -1070,6 +1091,7 @@ export interface FileRouteTypes {
     | '/_dashboard/services/$serviceId'
     | '/_dashboard/services/create'
     | '/_dashboard/users/$userId'
+    | '/_dashboard/users/create'
     | '/_dashboard/admins/$adminId/delete'
     | '/_dashboard/admins/$adminId/edit'
     | '/_dashboard/hosts/$hostId/delete'
@@ -1187,7 +1209,8 @@ export const routeTree = rootRoute
       "filePath": "_dashboard/users.lazy.tsx",
       "parent": "/_dashboard",
       "children": [
-        "/_dashboard/users/$userId"
+        "/_dashboard/users/$userId",
+        "/_dashboard/users/create"
       ]
     },
     "/_dashboard/": {
@@ -1263,6 +1286,10 @@ export const routeTree = rootRoute
         "/_dashboard/users/$userId/edit",
         "/_dashboard/users/$userId/"
       ]
+    },
+    "/_dashboard/users/create": {
+      "filePath": "_dashboard/users/create.tsx",
+      "parent": "/_dashboard/users"
     },
     "/_dashboard/admins/$adminId/delete": {
       "filePath": "_dashboard/admins/$adminId/delete.tsx",

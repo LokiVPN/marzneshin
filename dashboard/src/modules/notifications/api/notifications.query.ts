@@ -29,7 +29,7 @@ export async function fetchNotifications({ queryKey }: EntityQueryKeyType): Fetc
 }
 
 
-export const NotificationsQueryFetchKey = "notifications";
+export const NotificationsQueryFetchKey = "notifications-fetch-key";
 
 export const useNotificationsQuery = ({
     page, size, sortBy = "created_at", desc = false, filters = {}

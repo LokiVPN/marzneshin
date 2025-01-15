@@ -13,7 +13,7 @@ export async function fetchNotification({
     });
 }
 
-const NotificationQueryFetchKey = "notifications";
+const NotificationQueryFetchKey = "notification-fetch-key";
 
 export const useNotificationQuery = ({ notificationId }: { notificationId: number }) => {
     return useQuery({
