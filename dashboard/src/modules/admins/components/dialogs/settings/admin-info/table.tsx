@@ -18,11 +18,9 @@ import {
 } from "@marzneshin/modules/admins";
 import { useTranslation } from "react-i18next";
 import { LoaderIcon, UserCheck, UserX } from "lucide-react";
-import { format } from '@chbphone55/pretty-bytes';
 
 export const AdminInfoTable: FC<AdminProp> = ({ admin: entity }) => {
     const { t } = useTranslation();
-    const usersDataUsage = format(entity.users_data_usage);
     const { mutate: adminStatusEnable, isPending: enablePending } = useAdminUsersStatusEnable()
     const { mutate: adminStatusDisable, isPending: disablePending } = useAdminUsersStatusDisable()
 
@@ -57,6 +55,7 @@ export const AdminInfoTable: FC<AdminProp> = ({ admin: entity }) => {
                 <Table>
                     <TableBody>
                         <TableRowWithCell label={t("username")} value={entity.username} />
+                        <TableRowWithCell label={t("telegram_chat_id")} value={entity.telegram_chat_id} />
                         <TableRowWithCell
                             label={t("enabled")}
                             value={<AdminEnabledPill admin={entity} />}
@@ -65,11 +64,6 @@ export const AdminInfoTable: FC<AdminProp> = ({ admin: entity }) => {
                             label={t("page.admins.permission")}
                             value={<AdminPermissionPill admin={entity} />}
                         />
-                        <TableRowWithCell
-                            label={t("page.admins.users-data-usage")}
-                            value={`${usersDataUsage[0]} ${usersDataUsage[1]}`}
-                        />
-
                     </TableBody>
                 </Table>
             </CardContent>

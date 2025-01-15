@@ -18,3 +18,6 @@ env.globals["now"] = datetime.utcnow
 
 def render_template(template: str, context: Union[dict, None] = None) -> str:
     return env.get_template(template).render(context or {})
+
+def render_template_string(template: str, context: Union[dict, None] = None) -> str:
+    return env.from_string(template).render(context or {})

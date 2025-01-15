@@ -22,6 +22,8 @@ from app.db.models import (
     User,
     Backend,
     HostChain,
+    Notification,
+    NotificationTarget,
 )
 from app.models.admin import AdminCreate, AdminPartialModify
 from app.models.node import (
@@ -29,6 +31,7 @@ from app.models.node import (
     NodeModify,
     NodeStatus,
 )
+from app.models.notification import CreateDBNotification, ModifyDBNotification
 from app.models.proxy import InboundHost as InboundHostModify
 from app.models.service import Service as ServiceModify, ServiceCreate
 from app.models.system import TrafficUsageSeries
@@ -817,6 +820,7 @@ def create_admin(db: Session, admin: AdminCreate):
         .filter(Service.id.in_(admin.service_ids))
         .all(),
         subscription_url_prefix=admin.subscription_url_prefix,
+        telegram_chat_id=admin.telegram_chat_id,
     )
     db.add(dbadmin)
     db.commit()
@@ -834,6 +838,7 @@ def update_admin(
         "all_services_access",
         "modify_users_access",
         "subscription_url_prefix",
+        "telegram_chat_id",
     ]:
         if not isinstance(getattr(modifications, attribute), NoneType):
             setattr(dbadmin, attribute, getattr(modifications, attribute))
@@ -861,6 +866,8 @@ def partial_update_admin(
     ):
         dbadmin.hashed_password = modified_admin.hashed_password
         dbadmin.password_reset_at = datetime.utcnow()
+    if modified_admin.telegram_chat_id is not None:
+        dbadmin.telegram_chat_id = modified_admin.telegram_chat_id
 
     db.commit()
     db.refresh(dbadmin)
@@ -1069,3 +1076,108 @@ def update_node_status(
         db_node.message = message
     db_node.last_status_change = datetime.utcnow()
     db.commit()
+
+
+NotificationsSortingOptions = Enum(
+    "NotificationsSortingOptions",
+    {
+        "id": Notification.id.asc(),
+        "label": Notification.label.asc(),
+        "action": Notification.action.asc(),
+        "created_at": Notification.created_at.asc(),
+        "started_at": Notification.started_at.asc(),
+        "finished_at": Notification.finished_at.asc(),
+        "-id": Notification.id.desc(),
+        "-label": Notification.label.desc(),
+        "-action": Notification.action.desc(),
+        "-created_at": Notification.created_at.desc(),
+        "-started_at": Notification.started_at.desc(),
+        "-finished_at": Notification.finished_at.desc(),
+    },
+)
+
+
+def get_notifications(
+    db: Session,
+    offset: Optional[int] = None,
+    limit: Optional[int] = None,
+    ids: Optional[List[int]] = None,
+    labels: Optional[List[str]] = None,
+    sort: Optional[List[NotificationsSortingOptions]] = None,
+) -> Union[List[Notification], Tuple[List[Notification], int]]:
+    query = db.query(Notification)
+
+    if ids:
+        query = query.filter(Notification.id.in_(ids))
+
+    if labels:
+        if len(labels) == 1:
+            query = query.filter(Notification.label.ilike(f"%{labels[0]}%"))
+        else:
+            query = query.filter(Notification.label.in_(labels))
+
+    if sort:
+        query = query.order_by(*(opt.value for opt in sort))
+
+    if offset:
+        query = query.offset(offset)
+
+    if limit:
+        query = query.limit(limit)
+
+    return query.all()
+
+
+def create_notification(
+    db: Session,
+    notification: CreateDBNotification,
+) -> Notification:
+    db_notification = Notification(
+        label=notification.label,
+        action=notification.action,
+    )
+    for user_id in notification.user_ids:
+        db_notification.targets.append(NotificationTarget(user_id=user_id))
+    db.add(db_notification)
+    db.commit()
+    db.refresh(db_notification)
+    return db_notification
+
+
+def get_notification_by_id(db: Session, notification_id: int):
+    return (
+        db.query(Notification)
+        .filter(Notification.id == notification_id)
+        .first()
+    )
+
+
+def update_notification(
+    db: Session,
+    db_notification: Notification,
+    modify: ModifyDBNotification,
+) -> Notification:
+    if modify.message is not None:
+        db_notification.message = modify.message
+
+    if modify.user_ids is not None:
+        # merge existing targets with new ones and remove duplicates
+        existing_targets = db_notification.targets
+        new_targets = set(modify.user_ids)
+        for target in existing_targets:
+            if target.user_id in new_targets:
+                new_targets.remove(target.user_id)
+            else:
+                db.delete(target)
+        for user_id in new_targets:
+            db_notification.targets.append(NotificationTarget(user_id=user_id))
+
+    db.commit()
+    db.refresh(db_notification)
+    return db_notification
+
+
+def remove_notification(db: Session, db_notification: Notification):
+    db.delete(db_notification)
+    db.commit()
+    return db_notification

@@ -25,7 +25,7 @@ def get_or_create_user(
         new_user = UserCreate(
             id=tg_user.id,
             username=tg_user.username,
-            is_telegram_premium=tg_user.is_premium,
+            is_telegram_premium=tg_user.is_premium or False,
             service_ids=[service.id for service in services],
             expire_strategy=UserExpireStrategy.FIXED_DATE,
             expire_date=datetime.utcnow()
@@ -49,7 +49,7 @@ def get_or_create_user(
             user,
             UserModify(
                 username=tg_user.username,
-                is_telegram_premium=tg_user.is_premium,
+                is_telegram_premium=tg_user.is_premium or False,
             ),
         )
 

@@ -24,6 +24,9 @@ export const columns = (actions: ColumnActions<AdminType>): ColumnDef<AdminType,
         ),
     },
     {
+        accessorKey: "telegram_chat_id",
+    },
+    {
         accessorKey: "enabled",
         enableSorting: false,
         header: ({ column }) => (

@@ -1,11 +1,11 @@
-from datetime import datetime as dt
+from datetime import datetime as dt, datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.models.admin import Admin
-from app.models.user import UserResponse
+from app.models.user import UserResponse, User
 
 
 class Notification(BaseModel):
@@ -18,6 +18,7 @@ class AdminNotif(Notification):
 
 class UserNotification(Notification):
     user: UserResponse
+    message: str
 
     class Action(str, Enum):
         user_created = "user_created"
@@ -31,6 +32,8 @@ class UserNotification(Notification):
         subscription_revoked = "subscription_revoked"
         reached_usage_percent = "reached_usage_percent"
         reached_days_left = "reached_days_left"
+        get_bonus = "get_bonus"
+        custom = "custom"
 
 
 class UserCreated(UserNotification):
@@ -88,3 +91,48 @@ class ReachedUsagePercent(UserNotification):
 
 class ReachedDaysLeft(UserNotification):
     action: UserNotification.Action = UserNotification.Action.reached_days_left
+
+
+class GetBonus(UserNotification):
+    action: UserNotification.Action = UserNotification.Action.get_bonus
+
+
+class CustomNotification(UserNotification):
+    action: UserNotification.Action = UserNotification.Action.custom
+
+
+class DBNotificationTargetResponse(BaseModel):
+    user: UserResponse
+    sent_at: datetime | None
+    skipped: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DBNotification(BaseModel):
+    id: int | None = None
+    message: str
+
+
+class CreateDBNotification(DBNotification):
+    label: str
+    user_ids: list[int] = Field([])
+    action: UserNotification.Action
+
+
+class ModifyDBNotification(DBNotification):
+    user_ids: list[int] = Field([])
+    message: str | None = None
+
+
+class DBNotificationResponse(DBNotification):
+    id: int
+    label: str
+    action: UserNotification.Action
+    created_at: datetime
+    started_at: datetime | None
+    finished_at: datetime | None
+    user_ids: list[int]
+    completed: bool
+
+    model_config = ConfigDict(from_attributes=True)

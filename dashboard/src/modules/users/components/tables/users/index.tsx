@@ -39,7 +39,6 @@ export const UsersTable: FC = () => {
             columns={isSudo() ? columns : noneSudoColumns}
             primaryFilter="username"
             entityKey={UsersQueryFetchKey}
-            onCreate={() => navigate({ to: "/users/create" })}
             onOpen={onOpen}
         />
     );

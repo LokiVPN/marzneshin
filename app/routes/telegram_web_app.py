@@ -37,7 +37,9 @@ async def get_db_user(request: Request, db: DBDep):
     bot = await BotManager.get_instance()
     if not bot:
         logger.error("Telegram bot is not initialized.")
-        raise HTTPException(status_code=500, detail="Telegram bot is not initialized.")
+        raise HTTPException(
+            status_code=500, detail="Telegram bot is not initialized."
+        )
 
     data = await request.form()
     logger.info(f"Webapp init data: {data}")

@@ -72,6 +72,7 @@
         "@testing-library/react": "^14.3.1",
         "@testing-library/user-event": "^14.5.2",
         "@uidotdev/usehooks": "^2.4.1",
+        "@uiw/react-md-editor": "^4.0.5",
         "@visx/group": "^3.12.0",
         "@visx/legend": "^3.12.0",
         "@visx/scale": "^3.12.0",

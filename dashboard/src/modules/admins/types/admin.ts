@@ -1,6 +1,7 @@
 
 export interface AdminType {
     id: number;
+    telegram_chat_id: number;
     username: string;
     enabled: boolean;
     is_sudo: boolean;

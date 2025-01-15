@@ -19,6 +19,8 @@ from app.models.notification import (
     UserSubscriptionRevoked,
     ReachedUsagePercent,
     ReachedDaysLeft,
+    CustomNotification,
+    GetBonus,
 )
 from app.models.user import UserResponse
 
@@ -51,17 +53,20 @@ class UserNotificationFactory(NotificationFactory):
         Action.subscription_revoked: UserSubscriptionRevoked,
         Action.reached_usage_percent: ReachedUsagePercent,
         Action.reached_days_left: ReachedDaysLeft,
+        Action.get_bonus: GetBonus,
+        Action.custom: CustomNotification,
     }
 
     def create_notification(
         self,
         action: UserNotification.Action,
         user: UserResponse,
+        message: Optional[str] = None,
         by: Optional[Admin] = None,
         **kwargs: Any
     ) -> UserNotification:
         notification_class = self.notification_classes.get(action)
-        return notification_class(user=user, by=by, **kwargs)
+        return notification_class(user=user, by=by, message=message, **kwargs)
 
 
 class NotificationStrategy:

@@ -26,6 +26,7 @@ import {
     SubscriptionUrlPrefixField,
     SudoPrivilageField,
     AllServicesAccessField,
+    TelegramChatIdField,
 } from "./fields";
 import { useMutationDialog, MutationDialogProps } from "@marzneshin/common/hooks";
 
@@ -74,6 +75,7 @@ export const AdminsMutationDialog: FC<MutationDialogProps<AdminType>> = ({
                             <div className="flex-col grid-cols-2 gap-2 sm:flex md:grid h-full">
                                 <div className="space-y-3">
                                     <UsernameField disabled={!!entity} />
+                                    <TelegramChatIdField />
                                     <PasswordField change={change} handleChange={setChange} />
                                     <SubscriptionUrlPrefixField />
                                     <EnabledField />

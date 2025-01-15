@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const AdminEditSchema = z.object({
     username: z.string().min(1, { message: 'Username is required' }),
+    telegram_chat_id: z.number().nullable().optional(),
     is_sudo: z.boolean(),
     enabled: z.boolean().optional(),
     all_services_access: z.boolean().optional(),
@@ -17,6 +18,7 @@ export const AdminEditSchema = z.object({
 
 export const AdminCreateSchema = z.object({
     username: z.string().min(1, { message: 'Username is required' }),
+    telegram_chat_id: z.number().nullable().optional(),
     is_sudo: z.boolean(),
     enabled: z.boolean().optional(),
     all_services_access: z.boolean().optional(),

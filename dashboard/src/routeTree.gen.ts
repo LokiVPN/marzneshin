@@ -16,10 +16,11 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as DashboardImport } from './routes/_dashboard'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as AuthLoginImport } from './routes/_auth/login'
-import { Route as DashboardUsersCreateImport } from './routes/_dashboard/users/create'
 import { Route as DashboardUsersUserIdImport } from './routes/_dashboard/users/$userId'
 import { Route as DashboardServicesCreateImport } from './routes/_dashboard/services/create'
 import { Route as DashboardServicesServiceIdImport } from './routes/_dashboard/services/$serviceId'
+import { Route as DashboardNotificationsCreateImport } from './routes/_dashboard/notifications/create'
+import { Route as DashboardNotificationsNotificationIdImport } from './routes/_dashboard/notifications/$notificationId'
 import { Route as DashboardNodesCreateImport } from './routes/_dashboard/nodes/create'
 import { Route as DashboardNodesNodeIdImport } from './routes/_dashboard/nodes/$nodeId'
 import { Route as DashboardHostsHostIdImport } from './routes/_dashboard/hosts/$hostId'
@@ -27,6 +28,7 @@ import { Route as DashboardAdminsCreateImport } from './routes/_dashboard/admins
 import { Route as DashboardAdminsAdminIdImport } from './routes/_dashboard/admins/$adminId'
 import { Route as DashboardUsersUserIdIndexImport } from './routes/_dashboard/users/$userId/index'
 import { Route as DashboardServicesServiceIdIndexImport } from './routes/_dashboard/services/$serviceId/index'
+import { Route as DashboardNotificationsNotificationIdIndexImport } from './routes/_dashboard/notifications/$notificationId/index'
 import { Route as DashboardNodesNodeIdIndexImport } from './routes/_dashboard/nodes/$nodeId/index'
 import { Route as DashboardHostsHostIdIndexImport } from './routes/_dashboard/hosts/$hostId/index'
 import { Route as DashboardAdminsAdminIdIndexImport } from './routes/_dashboard/admins/$adminId/index'
@@ -34,6 +36,8 @@ import { Route as DashboardUsersUserIdEditImport } from './routes/_dashboard/use
 import { Route as DashboardUsersUserIdDeleteImport } from './routes/_dashboard/users/$userId/delete'
 import { Route as DashboardServicesServiceIdEditImport } from './routes/_dashboard/services/$serviceId/edit'
 import { Route as DashboardServicesServiceIdDeleteImport } from './routes/_dashboard/services/$serviceId/delete'
+import { Route as DashboardNotificationsNotificationIdEditImport } from './routes/_dashboard/notifications/$notificationId/edit'
+import { Route as DashboardNotificationsNotificationIdDeleteImport } from './routes/_dashboard/notifications/$notificationId/delete'
 import { Route as DashboardNodesNodeIdEditImport } from './routes/_dashboard/nodes/$nodeId/edit'
 import { Route as DashboardNodesNodeIdDeleteImport } from './routes/_dashboard/nodes/$nodeId/delete'
 import { Route as DashboardHostsInboundIdCreateImport } from './routes/_dashboard/hosts/$inboundId/create'
@@ -48,6 +52,9 @@ const DashboardIndexLazyImport = createFileRoute('/_dashboard/')()
 const DashboardUsersLazyImport = createFileRoute('/_dashboard/users')()
 const DashboardSettingsLazyImport = createFileRoute('/_dashboard/settings')()
 const DashboardServicesLazyImport = createFileRoute('/_dashboard/services')()
+const DashboardNotificationsLazyImport = createFileRoute(
+  '/_dashboard/notifications',
+)()
 const DashboardNodesLazyImport = createFileRoute('/_dashboard/nodes')()
 const DashboardHostsLazyImport = createFileRoute('/_dashboard/hosts')()
 const DashboardAdminsLazyImport = createFileRoute('/_dashboard/admins')()
@@ -96,6 +103,16 @@ const DashboardServicesLazyRoute = DashboardServicesLazyImport.update({
   import('./routes/_dashboard/services.lazy').then((d) => d.Route),
 )
 
+const DashboardNotificationsLazyRoute = DashboardNotificationsLazyImport.update(
+  {
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => DashboardRoute,
+  } as any,
+).lazy(() =>
+  import('./routes/_dashboard/notifications.lazy').then((d) => d.Route),
+)
+
 const DashboardNodesLazyRoute = DashboardNodesLazyImport.update({
   id: '/nodes',
   path: '/nodes',
@@ -126,12 +143,6 @@ const AuthLoginRoute = AuthLoginImport.update({
   getParentRoute: () => AuthRoute,
 } as any)
 
-const DashboardUsersCreateRoute = DashboardUsersCreateImport.update({
-  id: '/create',
-  path: '/create',
-  getParentRoute: () => DashboardUsersLazyRoute,
-} as any)
-
 const DashboardUsersUserIdRoute = DashboardUsersUserIdImport.update({
   id: '/$userId',
   path: '/$userId',
@@ -151,6 +162,20 @@ const DashboardServicesServiceIdRoute = DashboardServicesServiceIdImport.update(
     getParentRoute: () => DashboardServicesLazyRoute,
   } as any,
 )
+
+const DashboardNotificationsCreateRoute =
+  DashboardNotificationsCreateImport.update({
+    id: '/create',
+    path: '/create',
+    getParentRoute: () => DashboardNotificationsLazyRoute,
+  } as any)
+
+const DashboardNotificationsNotificationIdRoute =
+  DashboardNotificationsNotificationIdImport.update({
+    id: '/$notificationId',
+    path: '/$notificationId',
+    getParentRoute: () => DashboardNotificationsLazyRoute,
+  } as any)
 
 const DashboardNodesCreateRoute = DashboardNodesCreateImport.update({
   id: '/create',
@@ -193,6 +218,13 @@ const DashboardServicesServiceIdIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => DashboardServicesServiceIdRoute,
+  } as any)
+
+const DashboardNotificationsNotificationIdIndexRoute =
+  DashboardNotificationsNotificationIdIndexImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardNotificationsNotificationIdRoute,
   } as any)
 
 const DashboardNodesNodeIdIndexRoute = DashboardNodesNodeIdIndexImport.update({
@@ -240,6 +272,20 @@ const DashboardServicesServiceIdDeleteRoute =
     id: '/delete',
     path: '/delete',
     getParentRoute: () => DashboardServicesServiceIdRoute,
+  } as any)
+
+const DashboardNotificationsNotificationIdEditRoute =
+  DashboardNotificationsNotificationIdEditImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => DashboardNotificationsNotificationIdRoute,
+  } as any)
+
+const DashboardNotificationsNotificationIdDeleteRoute =
+  DashboardNotificationsNotificationIdDeleteImport.update({
+    id: '/delete',
+    path: '/delete',
+    getParentRoute: () => DashboardNotificationsNotificationIdRoute,
   } as any)
 
 const DashboardNodesNodeIdEditRoute = DashboardNodesNodeIdEditImport.update({
@@ -338,6 +384,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardNodesLazyImport
       parentRoute: typeof DashboardImport
     }
+    '/_dashboard/notifications': {
+      id: '/_dashboard/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof DashboardNotificationsLazyImport
+      parentRoute: typeof DashboardImport
+    }
     '/_dashboard/services': {
       id: '/_dashboard/services'
       path: '/services'
@@ -401,6 +454,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardNodesCreateImport
       parentRoute: typeof DashboardNodesLazyImport
     }
+    '/_dashboard/notifications/$notificationId': {
+      id: '/_dashboard/notifications/$notificationId'
+      path: '/$notificationId'
+      fullPath: '/notifications/$notificationId'
+      preLoaderRoute: typeof DashboardNotificationsNotificationIdImport
+      parentRoute: typeof DashboardNotificationsLazyImport
+    }
+    '/_dashboard/notifications/create': {
+      id: '/_dashboard/notifications/create'
+      path: '/create'
+      fullPath: '/notifications/create'
+      preLoaderRoute: typeof DashboardNotificationsCreateImport
+      parentRoute: typeof DashboardNotificationsLazyImport
+    }
     '/_dashboard/services/$serviceId': {
       id: '/_dashboard/services/$serviceId'
       path: '/$serviceId'
@@ -420,13 +487,6 @@ declare module '@tanstack/react-router' {
       path: '/$userId'
       fullPath: '/users/$userId'
       preLoaderRoute: typeof DashboardUsersUserIdImport
-      parentRoute: typeof DashboardUsersLazyImport
-    }
-    '/_dashboard/users/create': {
-      id: '/_dashboard/users/create'
-      path: '/create'
-      fullPath: '/users/create'
-      preLoaderRoute: typeof DashboardUsersCreateImport
       parentRoute: typeof DashboardUsersLazyImport
     }
     '/_dashboard/admins/$adminId/delete': {
@@ -478,6 +538,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardNodesNodeIdEditImport
       parentRoute: typeof DashboardNodesNodeIdImport
     }
+    '/_dashboard/notifications/$notificationId/delete': {
+      id: '/_dashboard/notifications/$notificationId/delete'
+      path: '/delete'
+      fullPath: '/notifications/$notificationId/delete'
+      preLoaderRoute: typeof DashboardNotificationsNotificationIdDeleteImport
+      parentRoute: typeof DashboardNotificationsNotificationIdImport
+    }
+    '/_dashboard/notifications/$notificationId/edit': {
+      id: '/_dashboard/notifications/$notificationId/edit'
+      path: '/edit'
+      fullPath: '/notifications/$notificationId/edit'
+      preLoaderRoute: typeof DashboardNotificationsNotificationIdEditImport
+      parentRoute: typeof DashboardNotificationsNotificationIdImport
+    }
     '/_dashboard/services/$serviceId/delete': {
       id: '/_dashboard/services/$serviceId/delete'
       path: '/delete'
@@ -526,6 +600,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/nodes/$nodeId/'
       preLoaderRoute: typeof DashboardNodesNodeIdIndexImport
       parentRoute: typeof DashboardNodesNodeIdImport
+    }
+    '/_dashboard/notifications/$notificationId/': {
+      id: '/_dashboard/notifications/$notificationId/'
+      path: '/'
+      fullPath: '/notifications/$notificationId/'
+      preLoaderRoute: typeof DashboardNotificationsNotificationIdIndexImport
+      parentRoute: typeof DashboardNotificationsNotificationIdImport
     }
     '/_dashboard/services/$serviceId/': {
       id: '/_dashboard/services/$serviceId/'
@@ -643,6 +724,44 @@ const DashboardNodesLazyRouteChildren: DashboardNodesLazyRouteChildren = {
 const DashboardNodesLazyRouteWithChildren =
   DashboardNodesLazyRoute._addFileChildren(DashboardNodesLazyRouteChildren)
 
+interface DashboardNotificationsNotificationIdRouteChildren {
+  DashboardNotificationsNotificationIdDeleteRoute: typeof DashboardNotificationsNotificationIdDeleteRoute
+  DashboardNotificationsNotificationIdEditRoute: typeof DashboardNotificationsNotificationIdEditRoute
+  DashboardNotificationsNotificationIdIndexRoute: typeof DashboardNotificationsNotificationIdIndexRoute
+}
+
+const DashboardNotificationsNotificationIdRouteChildren: DashboardNotificationsNotificationIdRouteChildren =
+  {
+    DashboardNotificationsNotificationIdDeleteRoute:
+      DashboardNotificationsNotificationIdDeleteRoute,
+    DashboardNotificationsNotificationIdEditRoute:
+      DashboardNotificationsNotificationIdEditRoute,
+    DashboardNotificationsNotificationIdIndexRoute:
+      DashboardNotificationsNotificationIdIndexRoute,
+  }
+
+const DashboardNotificationsNotificationIdRouteWithChildren =
+  DashboardNotificationsNotificationIdRoute._addFileChildren(
+    DashboardNotificationsNotificationIdRouteChildren,
+  )
+
+interface DashboardNotificationsLazyRouteChildren {
+  DashboardNotificationsNotificationIdRoute: typeof DashboardNotificationsNotificationIdRouteWithChildren
+  DashboardNotificationsCreateRoute: typeof DashboardNotificationsCreateRoute
+}
+
+const DashboardNotificationsLazyRouteChildren: DashboardNotificationsLazyRouteChildren =
+  {
+    DashboardNotificationsNotificationIdRoute:
+      DashboardNotificationsNotificationIdRouteWithChildren,
+    DashboardNotificationsCreateRoute: DashboardNotificationsCreateRoute,
+  }
+
+const DashboardNotificationsLazyRouteWithChildren =
+  DashboardNotificationsLazyRoute._addFileChildren(
+    DashboardNotificationsLazyRouteChildren,
+  )
+
 interface DashboardServicesServiceIdRouteChildren {
   DashboardServicesServiceIdDeleteRoute: typeof DashboardServicesServiceIdDeleteRoute
   DashboardServicesServiceIdEditRoute: typeof DashboardServicesServiceIdEditRoute
@@ -694,12 +813,10 @@ const DashboardUsersUserIdRouteWithChildren =
 
 interface DashboardUsersLazyRouteChildren {
   DashboardUsersUserIdRoute: typeof DashboardUsersUserIdRouteWithChildren
-  DashboardUsersCreateRoute: typeof DashboardUsersCreateRoute
 }
 
 const DashboardUsersLazyRouteChildren: DashboardUsersLazyRouteChildren = {
   DashboardUsersUserIdRoute: DashboardUsersUserIdRouteWithChildren,
-  DashboardUsersCreateRoute: DashboardUsersCreateRoute,
 }
 
 const DashboardUsersLazyRouteWithChildren =
@@ -709,6 +826,7 @@ interface DashboardRouteChildren {
   DashboardAdminsLazyRoute: typeof DashboardAdminsLazyRouteWithChildren
   DashboardHostsLazyRoute: typeof DashboardHostsLazyRouteWithChildren
   DashboardNodesLazyRoute: typeof DashboardNodesLazyRouteWithChildren
+  DashboardNotificationsLazyRoute: typeof DashboardNotificationsLazyRouteWithChildren
   DashboardServicesLazyRoute: typeof DashboardServicesLazyRouteWithChildren
   DashboardSettingsLazyRoute: typeof DashboardSettingsLazyRoute
   DashboardUsersLazyRoute: typeof DashboardUsersLazyRouteWithChildren
@@ -719,6 +837,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAdminsLazyRoute: DashboardAdminsLazyRouteWithChildren,
   DashboardHostsLazyRoute: DashboardHostsLazyRouteWithChildren,
   DashboardNodesLazyRoute: DashboardNodesLazyRouteWithChildren,
+  DashboardNotificationsLazyRoute: DashboardNotificationsLazyRouteWithChildren,
   DashboardServicesLazyRoute: DashboardServicesLazyRouteWithChildren,
   DashboardSettingsLazyRoute: DashboardSettingsLazyRoute,
   DashboardUsersLazyRoute: DashboardUsersLazyRouteWithChildren,
@@ -735,6 +854,7 @@ export interface FileRoutesByFullPath {
   '/admins': typeof DashboardAdminsLazyRouteWithChildren
   '/hosts': typeof DashboardHostsLazyRouteWithChildren
   '/nodes': typeof DashboardNodesLazyRouteWithChildren
+  '/notifications': typeof DashboardNotificationsLazyRouteWithChildren
   '/services': typeof DashboardServicesLazyRouteWithChildren
   '/settings': typeof DashboardSettingsLazyRoute
   '/users': typeof DashboardUsersLazyRouteWithChildren
@@ -744,10 +864,11 @@ export interface FileRoutesByFullPath {
   '/hosts/$hostId': typeof DashboardHostsHostIdRouteWithChildren
   '/nodes/$nodeId': typeof DashboardNodesNodeIdRouteWithChildren
   '/nodes/create': typeof DashboardNodesCreateRoute
+  '/notifications/$notificationId': typeof DashboardNotificationsNotificationIdRouteWithChildren
+  '/notifications/create': typeof DashboardNotificationsCreateRoute
   '/services/$serviceId': typeof DashboardServicesServiceIdRouteWithChildren
   '/services/create': typeof DashboardServicesCreateRoute
   '/users/$userId': typeof DashboardUsersUserIdRouteWithChildren
-  '/users/create': typeof DashboardUsersCreateRoute
   '/admins/$adminId/delete': typeof DashboardAdminsAdminIdDeleteRoute
   '/admins/$adminId/edit': typeof DashboardAdminsAdminIdEditRoute
   '/hosts/$hostId/delete': typeof DashboardHostsHostIdDeleteRoute
@@ -755,6 +876,8 @@ export interface FileRoutesByFullPath {
   '/hosts/$inboundId/create': typeof DashboardHostsInboundIdCreateRoute
   '/nodes/$nodeId/delete': typeof DashboardNodesNodeIdDeleteRoute
   '/nodes/$nodeId/edit': typeof DashboardNodesNodeIdEditRoute
+  '/notifications/$notificationId/delete': typeof DashboardNotificationsNotificationIdDeleteRoute
+  '/notifications/$notificationId/edit': typeof DashboardNotificationsNotificationIdEditRoute
   '/services/$serviceId/delete': typeof DashboardServicesServiceIdDeleteRoute
   '/services/$serviceId/edit': typeof DashboardServicesServiceIdEditRoute
   '/users/$userId/delete': typeof DashboardUsersUserIdDeleteRoute
@@ -762,6 +885,7 @@ export interface FileRoutesByFullPath {
   '/admins/$adminId/': typeof DashboardAdminsAdminIdIndexRoute
   '/hosts/$hostId/': typeof DashboardHostsHostIdIndexRoute
   '/nodes/$nodeId/': typeof DashboardNodesNodeIdIndexRoute
+  '/notifications/$notificationId/': typeof DashboardNotificationsNotificationIdIndexRoute
   '/services/$serviceId/': typeof DashboardServicesServiceIdIndexRoute
   '/users/$userId/': typeof DashboardUsersUserIdIndexRoute
 }
@@ -772,14 +896,15 @@ export interface FileRoutesByTo {
   '/admins': typeof DashboardAdminsLazyRouteWithChildren
   '/hosts': typeof DashboardHostsLazyRouteWithChildren
   '/nodes': typeof DashboardNodesLazyRouteWithChildren
+  '/notifications': typeof DashboardNotificationsLazyRouteWithChildren
   '/services': typeof DashboardServicesLazyRouteWithChildren
   '/settings': typeof DashboardSettingsLazyRoute
   '/users': typeof DashboardUsersLazyRouteWithChildren
   '/': typeof DashboardIndexLazyRoute
   '/admins/create': typeof DashboardAdminsCreateRoute
   '/nodes/create': typeof DashboardNodesCreateRoute
+  '/notifications/create': typeof DashboardNotificationsCreateRoute
   '/services/create': typeof DashboardServicesCreateRoute
-  '/users/create': typeof DashboardUsersCreateRoute
   '/admins/$adminId/delete': typeof DashboardAdminsAdminIdDeleteRoute
   '/admins/$adminId/edit': typeof DashboardAdminsAdminIdEditRoute
   '/hosts/$hostId/delete': typeof DashboardHostsHostIdDeleteRoute
@@ -787,6 +912,8 @@ export interface FileRoutesByTo {
   '/hosts/$inboundId/create': typeof DashboardHostsInboundIdCreateRoute
   '/nodes/$nodeId/delete': typeof DashboardNodesNodeIdDeleteRoute
   '/nodes/$nodeId/edit': typeof DashboardNodesNodeIdEditRoute
+  '/notifications/$notificationId/delete': typeof DashboardNotificationsNotificationIdDeleteRoute
+  '/notifications/$notificationId/edit': typeof DashboardNotificationsNotificationIdEditRoute
   '/services/$serviceId/delete': typeof DashboardServicesServiceIdDeleteRoute
   '/services/$serviceId/edit': typeof DashboardServicesServiceIdEditRoute
   '/users/$userId/delete': typeof DashboardUsersUserIdDeleteRoute
@@ -794,6 +921,7 @@ export interface FileRoutesByTo {
   '/admins/$adminId': typeof DashboardAdminsAdminIdIndexRoute
   '/hosts/$hostId': typeof DashboardHostsHostIdIndexRoute
   '/nodes/$nodeId': typeof DashboardNodesNodeIdIndexRoute
+  '/notifications/$notificationId': typeof DashboardNotificationsNotificationIdIndexRoute
   '/services/$serviceId': typeof DashboardServicesServiceIdIndexRoute
   '/users/$userId': typeof DashboardUsersUserIdIndexRoute
 }
@@ -806,6 +934,7 @@ export interface FileRoutesById {
   '/_dashboard/admins': typeof DashboardAdminsLazyRouteWithChildren
   '/_dashboard/hosts': typeof DashboardHostsLazyRouteWithChildren
   '/_dashboard/nodes': typeof DashboardNodesLazyRouteWithChildren
+  '/_dashboard/notifications': typeof DashboardNotificationsLazyRouteWithChildren
   '/_dashboard/services': typeof DashboardServicesLazyRouteWithChildren
   '/_dashboard/settings': typeof DashboardSettingsLazyRoute
   '/_dashboard/users': typeof DashboardUsersLazyRouteWithChildren
@@ -815,10 +944,11 @@ export interface FileRoutesById {
   '/_dashboard/hosts/$hostId': typeof DashboardHostsHostIdRouteWithChildren
   '/_dashboard/nodes/$nodeId': typeof DashboardNodesNodeIdRouteWithChildren
   '/_dashboard/nodes/create': typeof DashboardNodesCreateRoute
+  '/_dashboard/notifications/$notificationId': typeof DashboardNotificationsNotificationIdRouteWithChildren
+  '/_dashboard/notifications/create': typeof DashboardNotificationsCreateRoute
   '/_dashboard/services/$serviceId': typeof DashboardServicesServiceIdRouteWithChildren
   '/_dashboard/services/create': typeof DashboardServicesCreateRoute
   '/_dashboard/users/$userId': typeof DashboardUsersUserIdRouteWithChildren
-  '/_dashboard/users/create': typeof DashboardUsersCreateRoute
   '/_dashboard/admins/$adminId/delete': typeof DashboardAdminsAdminIdDeleteRoute
   '/_dashboard/admins/$adminId/edit': typeof DashboardAdminsAdminIdEditRoute
   '/_dashboard/hosts/$hostId/delete': typeof DashboardHostsHostIdDeleteRoute
@@ -826,6 +956,8 @@ export interface FileRoutesById {
   '/_dashboard/hosts/$inboundId/create': typeof DashboardHostsInboundIdCreateRoute
   '/_dashboard/nodes/$nodeId/delete': typeof DashboardNodesNodeIdDeleteRoute
   '/_dashboard/nodes/$nodeId/edit': typeof DashboardNodesNodeIdEditRoute
+  '/_dashboard/notifications/$notificationId/delete': typeof DashboardNotificationsNotificationIdDeleteRoute
+  '/_dashboard/notifications/$notificationId/edit': typeof DashboardNotificationsNotificationIdEditRoute
   '/_dashboard/services/$serviceId/delete': typeof DashboardServicesServiceIdDeleteRoute
   '/_dashboard/services/$serviceId/edit': typeof DashboardServicesServiceIdEditRoute
   '/_dashboard/users/$userId/delete': typeof DashboardUsersUserIdDeleteRoute
@@ -833,6 +965,7 @@ export interface FileRoutesById {
   '/_dashboard/admins/$adminId/': typeof DashboardAdminsAdminIdIndexRoute
   '/_dashboard/hosts/$hostId/': typeof DashboardHostsHostIdIndexRoute
   '/_dashboard/nodes/$nodeId/': typeof DashboardNodesNodeIdIndexRoute
+  '/_dashboard/notifications/$notificationId/': typeof DashboardNotificationsNotificationIdIndexRoute
   '/_dashboard/services/$serviceId/': typeof DashboardServicesServiceIdIndexRoute
   '/_dashboard/users/$userId/': typeof DashboardUsersUserIdIndexRoute
 }
@@ -845,6 +978,7 @@ export interface FileRouteTypes {
     | '/admins'
     | '/hosts'
     | '/nodes'
+    | '/notifications'
     | '/services'
     | '/settings'
     | '/users'
@@ -854,10 +988,11 @@ export interface FileRouteTypes {
     | '/hosts/$hostId'
     | '/nodes/$nodeId'
     | '/nodes/create'
+    | '/notifications/$notificationId'
+    | '/notifications/create'
     | '/services/$serviceId'
     | '/services/create'
     | '/users/$userId'
-    | '/users/create'
     | '/admins/$adminId/delete'
     | '/admins/$adminId/edit'
     | '/hosts/$hostId/delete'
@@ -865,6 +1000,8 @@ export interface FileRouteTypes {
     | '/hosts/$inboundId/create'
     | '/nodes/$nodeId/delete'
     | '/nodes/$nodeId/edit'
+    | '/notifications/$notificationId/delete'
+    | '/notifications/$notificationId/edit'
     | '/services/$serviceId/delete'
     | '/services/$serviceId/edit'
     | '/users/$userId/delete'
@@ -872,6 +1009,7 @@ export interface FileRouteTypes {
     | '/admins/$adminId/'
     | '/hosts/$hostId/'
     | '/nodes/$nodeId/'
+    | '/notifications/$notificationId/'
     | '/services/$serviceId/'
     | '/users/$userId/'
   fileRoutesByTo: FileRoutesByTo
@@ -881,14 +1019,15 @@ export interface FileRouteTypes {
     | '/admins'
     | '/hosts'
     | '/nodes'
+    | '/notifications'
     | '/services'
     | '/settings'
     | '/users'
     | '/'
     | '/admins/create'
     | '/nodes/create'
+    | '/notifications/create'
     | '/services/create'
-    | '/users/create'
     | '/admins/$adminId/delete'
     | '/admins/$adminId/edit'
     | '/hosts/$hostId/delete'
@@ -896,6 +1035,8 @@ export interface FileRouteTypes {
     | '/hosts/$inboundId/create'
     | '/nodes/$nodeId/delete'
     | '/nodes/$nodeId/edit'
+    | '/notifications/$notificationId/delete'
+    | '/notifications/$notificationId/edit'
     | '/services/$serviceId/delete'
     | '/services/$serviceId/edit'
     | '/users/$userId/delete'
@@ -903,6 +1044,7 @@ export interface FileRouteTypes {
     | '/admins/$adminId'
     | '/hosts/$hostId'
     | '/nodes/$nodeId'
+    | '/notifications/$notificationId'
     | '/services/$serviceId'
     | '/users/$userId'
   id:
@@ -913,6 +1055,7 @@ export interface FileRouteTypes {
     | '/_dashboard/admins'
     | '/_dashboard/hosts'
     | '/_dashboard/nodes'
+    | '/_dashboard/notifications'
     | '/_dashboard/services'
     | '/_dashboard/settings'
     | '/_dashboard/users'
@@ -922,10 +1065,11 @@ export interface FileRouteTypes {
     | '/_dashboard/hosts/$hostId'
     | '/_dashboard/nodes/$nodeId'
     | '/_dashboard/nodes/create'
+    | '/_dashboard/notifications/$notificationId'
+    | '/_dashboard/notifications/create'
     | '/_dashboard/services/$serviceId'
     | '/_dashboard/services/create'
     | '/_dashboard/users/$userId'
-    | '/_dashboard/users/create'
     | '/_dashboard/admins/$adminId/delete'
     | '/_dashboard/admins/$adminId/edit'
     | '/_dashboard/hosts/$hostId/delete'
@@ -933,6 +1077,8 @@ export interface FileRouteTypes {
     | '/_dashboard/hosts/$inboundId/create'
     | '/_dashboard/nodes/$nodeId/delete'
     | '/_dashboard/nodes/$nodeId/edit'
+    | '/_dashboard/notifications/$notificationId/delete'
+    | '/_dashboard/notifications/$notificationId/edit'
     | '/_dashboard/services/$serviceId/delete'
     | '/_dashboard/services/$serviceId/edit'
     | '/_dashboard/users/$userId/delete'
@@ -940,6 +1086,7 @@ export interface FileRouteTypes {
     | '/_dashboard/admins/$adminId/'
     | '/_dashboard/hosts/$hostId/'
     | '/_dashboard/nodes/$nodeId/'
+    | '/_dashboard/notifications/$notificationId/'
     | '/_dashboard/services/$serviceId/'
     | '/_dashboard/users/$userId/'
   fileRoutesById: FileRoutesById
@@ -981,6 +1128,7 @@ export const routeTree = rootRoute
         "/_dashboard/admins",
         "/_dashboard/hosts",
         "/_dashboard/nodes",
+        "/_dashboard/notifications",
         "/_dashboard/services",
         "/_dashboard/settings",
         "/_dashboard/users",
@@ -1015,6 +1163,14 @@ export const routeTree = rootRoute
         "/_dashboard/nodes/create"
       ]
     },
+    "/_dashboard/notifications": {
+      "filePath": "_dashboard/notifications.lazy.tsx",
+      "parent": "/_dashboard",
+      "children": [
+        "/_dashboard/notifications/$notificationId",
+        "/_dashboard/notifications/create"
+      ]
+    },
     "/_dashboard/services": {
       "filePath": "_dashboard/services.lazy.tsx",
       "parent": "/_dashboard",
@@ -1031,8 +1187,7 @@ export const routeTree = rootRoute
       "filePath": "_dashboard/users.lazy.tsx",
       "parent": "/_dashboard",
       "children": [
-        "/_dashboard/users/$userId",
-        "/_dashboard/users/create"
+        "/_dashboard/users/$userId"
       ]
     },
     "/_dashboard/": {
@@ -1074,6 +1229,19 @@ export const routeTree = rootRoute
       "filePath": "_dashboard/nodes/create.tsx",
       "parent": "/_dashboard/nodes"
     },
+    "/_dashboard/notifications/$notificationId": {
+      "filePath": "_dashboard/notifications/$notificationId.tsx",
+      "parent": "/_dashboard/notifications",
+      "children": [
+        "/_dashboard/notifications/$notificationId/delete",
+        "/_dashboard/notifications/$notificationId/edit",
+        "/_dashboard/notifications/$notificationId/"
+      ]
+    },
+    "/_dashboard/notifications/create": {
+      "filePath": "_dashboard/notifications/create.tsx",
+      "parent": "/_dashboard/notifications"
+    },
     "/_dashboard/services/$serviceId": {
       "filePath": "_dashboard/services/$serviceId.tsx",
       "parent": "/_dashboard/services",
@@ -1095,10 +1263,6 @@ export const routeTree = rootRoute
         "/_dashboard/users/$userId/edit",
         "/_dashboard/users/$userId/"
       ]
-    },
-    "/_dashboard/users/create": {
-      "filePath": "_dashboard/users/create.tsx",
-      "parent": "/_dashboard/users"
     },
     "/_dashboard/admins/$adminId/delete": {
       "filePath": "_dashboard/admins/$adminId/delete.tsx",
@@ -1128,6 +1292,14 @@ export const routeTree = rootRoute
       "filePath": "_dashboard/nodes/$nodeId/edit.tsx",
       "parent": "/_dashboard/nodes/$nodeId"
     },
+    "/_dashboard/notifications/$notificationId/delete": {
+      "filePath": "_dashboard/notifications/$notificationId/delete.tsx",
+      "parent": "/_dashboard/notifications/$notificationId"
+    },
+    "/_dashboard/notifications/$notificationId/edit": {
+      "filePath": "_dashboard/notifications/$notificationId/edit.tsx",
+      "parent": "/_dashboard/notifications/$notificationId"
+    },
     "/_dashboard/services/$serviceId/delete": {
       "filePath": "_dashboard/services/$serviceId/delete.tsx",
       "parent": "/_dashboard/services/$serviceId"
@@ -1155,6 +1327,10 @@ export const routeTree = rootRoute
     "/_dashboard/nodes/$nodeId/": {
       "filePath": "_dashboard/nodes/$nodeId/index.tsx",
       "parent": "/_dashboard/nodes/$nodeId"
+    },
+    "/_dashboard/notifications/$notificationId/": {
+      "filePath": "_dashboard/notifications/$notificationId/index.tsx",
+      "parent": "/_dashboard/notifications/$notificationId"
     },
     "/_dashboard/services/$serviceId/": {
       "filePath": "_dashboard/services/$serviceId/index.tsx",

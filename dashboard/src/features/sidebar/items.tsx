@@ -1,5 +1,5 @@
 import { SidebarObject } from '@marzneshin/common/components';
-import { Box, Home, ShieldCheck, Server, ServerCog, Settings, UsersIcon } from 'lucide-react';
+import { Box, Home, ShieldCheck, Server, ServerCog, Settings, UsersIcon, BellIcon } from 'lucide-react';
 
 export const sidebarItems: SidebarObject = {
     Dashboard: [
@@ -15,6 +15,12 @@ export const sidebarItems: SidebarObject = {
             title: 'Users',
             to: '/users',
             icon: <UsersIcon />,
+            isParent: false,
+        },
+        {
+            title: 'Notifications',
+            to: '/notifications',
+            icon: <BellIcon />,
             isParent: false,
         },
         {

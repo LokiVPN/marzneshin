@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db import crud, User, GetDB
-from app.db.models import Service
+from app.db.models import Service, Notification
 from app.models.admin import Admin, oauth2_scheme
 from app.utils.auth import get_admin_payload
 
@@ -120,6 +120,13 @@ def get_service(id: int, db: Annotated[Session, Depends(get_db)]):
     return service
 
 
+def get_notification(id: int, db: Annotated[Session, Depends(get_db)]):
+    notification = crud.get_notification_by_id(db, id)
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return notification
+
+
 SubUserDep = Annotated[User, Depends(get_subscription_user)]
 UserDep = Annotated[User, Depends(get_user)]
 AdminDep = Annotated[Admin, Depends(get_current_admin)]
@@ -129,3 +136,4 @@ StartDateDep = Annotated[datetime, Depends(parse_start_date)]
 EndDateDep = Annotated[datetime, Depends(parse_end_date)]
 ModifyUsersAccess = Annotated[None, Depends(user_modification_access)]
 ServiceDep = Annotated[Service, Depends(get_service)]
+NotificationDep = Annotated[Notification, Depends(get_notification)]
