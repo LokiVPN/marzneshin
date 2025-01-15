@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   useRouterNotificationContext,
   NotificationSettingsDialog,
-} from '@marzneshin/modules/Notifications'
+} from '@marzneshin/modules/notifications'
 import { useDialog } from '@marzneshin/common/hooks'
 
 const NotificationOpen = () => {
