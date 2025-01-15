@@ -78,7 +78,7 @@ export const NavigationDirectory: FC<NavigationDirectoryProps> = ({ sidebar }) =
                                     <DropdownMenuContent align="start">
                                         {items.slice(1, -2).map((item, index) => (
                                             <DropdownMenuItem key={index}>
-                                                <Link to={item.href} className="capitalize">
+                                                <Link to={item.href.replace(/\/$/, "")} className="capitalize">
                                                     {item.label}
                                                 </Link>
                                             </DropdownMenuItem>
@@ -127,7 +127,7 @@ export const NavigationDirectory: FC<NavigationDirectoryProps> = ({ sidebar }) =
                                     asChild
                                     className="md:max-w-none max-w-20 truncate text-accent dark:text-accent-foreground hover:text-primary-foreground"
                                 >
-                                    <Link to={item.href}>{item.label}</Link>
+                                    <Link to={item.href.replace(/\/$/, "")}>{item.label}</Link>
                                 </BreadcrumbLink>
                                 {index !== items.slice(-ITEMS_TO_DISPLAY + 1).length - 1 && <BreadcrumbSeparator />}
                             </>

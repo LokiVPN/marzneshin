@@ -11,7 +11,7 @@ type BottomMenuItemProps = Omit<SidebarItem, 'isParent' | 'subItem'>
 const BottomMenuItem: FC<BottomMenuItemProps & { active: boolean }> = ({ title, icon, to, active }) => {
     return (
         <Button asChild variant={active ? "default" : "ghost"} className="gap-1 flex flex-col justify-center text-xs h-full py-2 size-14">
-            <Link to={to}>
+            <Link to={to.replace(/\/$/, "")}>
                 {icon}
                 {title}
             </Link>

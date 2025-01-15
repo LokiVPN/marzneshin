@@ -4,7 +4,7 @@ import uvicorn
 
 from app.config import env
 
-__version__ = "0.1.0"
+__version__ = "25.1.1"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG if env.DEBUG else logging.INFO)

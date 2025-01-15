@@ -36,7 +36,7 @@ export const SidebarItem: FC<SidebarItemProps> = ({
             className={cn(sidebarItemVariants({ variant, className }))}
         >
             <Link
-                to={item.to}
+                to={item.to.replace(/\/$/, "")}
                 onClick={() => setOpen?.(false)}
                 className={cn("flex flex-row items-center justify-center", {
                     "-justify-center gap-2": !collapsed,
