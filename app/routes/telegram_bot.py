@@ -4,7 +4,8 @@ from aiogram.types import Update
 from fastapi import APIRouter
 from starlette.requests import Request
 
-from app.bot.bot import dp, BotManager
+from app.bot.bot import dp
+from app.bot.manager import BotManager
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="", tags=["Telegram"])

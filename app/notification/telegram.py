@@ -1,14 +1,9 @@
 import logging
-from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramAPIError
 
-from app.bot.bot import BotManager
-from app.config.env import (
-    TELEGRAM_ADMIN_ID,
-    TELEGRAM_LOGGER_CHANNEL_ID,
-)
+from app.bot.manager import BotManager
+from app.config.env import TELEGRAM_LOGGER_CHANNEL_ID
 from app.models.notification import Notification, UserNotification
-from app.notification.helper import create_text
 from app.templates import render_template_string
 
 logger = logging.getLogger(__name__)

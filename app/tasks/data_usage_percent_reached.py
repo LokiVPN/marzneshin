@@ -46,18 +46,14 @@ async def data_usage_percent_reached(db: Session, users_usage: list) -> None:
         .all()
     )
 
-    if notification := crud.get_notification_by_label(
-        db, UserNotification.Action.reached_usage_percent
-    ):
-        for user in exceeding_users:
-            added_traffic = users_usage_dict[user.id]
-            user.used_traffic += added_traffic
-            asyncio.ensure_future(
-                notify(
-                    action=UserNotification.Action.reached_usage_percent,
-                    user=UserResponse.model_validate(user),
-                    message=notification.message,
-                )
+    for user in exceeding_users:
+        added_traffic = users_usage_dict[user.id]
+        user.used_traffic += added_traffic
+        asyncio.ensure_future(
+            notify(
+                action=UserNotification.Action.reached_usage_percent,
+                user=UserResponse.model_validate(user),
             )
+        )
 
     db.expunge_all()

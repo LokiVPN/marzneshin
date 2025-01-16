@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
-from app.bot.bot import BotManager
+from app.bot.manager import BotManager
 from app.bot.helper import create_invoice, get_prices
 from app.db import crud, User
 from app.dependencies import DBDep

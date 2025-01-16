@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 from app.models.admin import Admin
-from app.models.user import UserResponse, User
+from app.models.user import UserResponse
 
 
 class Notification(BaseModel):

@@ -3,6 +3,7 @@ from enum import Enum
 from functools import lru_cache
 from typing import Any, Dict, Type, Optional, Union
 
+from app.db import GetDB, crud
 from app.models.admin import Admin
 from app.models.notification import (
     Notification,
@@ -78,7 +79,10 @@ class NotificationStrategy:
         self, action: Enum, **kwargs: Any
     ) -> Union[UserNotification, AdminNotif]:
         if isinstance(action, UserNotification.Action):
-            return self.user_factory.create_notification(action, **kwargs)
+            with GetDB() as db:
+                if notif := crud.get_notification_by_label(db, action):
+                    return self.user_factory.create_notification(action, message=notif.message, **kwargs)
+                return self.user_factory.create_notification(action, **kwargs)
         elif isinstance(action, AdminNotif.Action):
             return self.admin_factory.create_notification(action, **kwargs)
 
