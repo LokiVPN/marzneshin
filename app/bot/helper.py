@@ -1,11 +1,14 @@
+import asyncio
 from datetime import datetime, timedelta
 import logging
 from aiogram.utils.payload import decode_payload, encode_payload
 from sqlalchemy.orm import Session
 from aiogram import types, Bot
 
+from app import marznode
 from app.config import TELEGRAM_PAYMENT_TOKEN
 from app.db import crud, User
+from app.models.notification import UserNotification
 from app.models.telegram import Currency
 from app.models.user import (
     UserCreate,
@@ -13,6 +16,7 @@ from app.models.user import (
     UserDataUsageResetStrategy,
     UserModify,
 )
+from app.notification import notify
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +24,7 @@ logger = logging.getLogger(__name__)
 def get_or_create_user(
     db: Session, tg_user: types.User, deep_link_payload: str = None
 ) -> User:
-    if not (user := crud.get_user_by_id(db, tg_user.id)):
+    if not (db_user := crud.get_user_by_id(db, tg_user.id)):
         services = crud.get_public_services(db)
         new_user = UserCreate(
             id=tg_user.id,
@@ -42,18 +46,48 @@ def get_or_create_user(
             if crud.get_user_by_id(db, invitee_id):
                 new_user.invited_by = invitee_id
 
-        user = crud.create_user(db, new_user)
+        db_user = crud.create_user(db, new_user)
+        marznode.operations.update_user(user=db_user)
+        if notification := crud.get_notification_by_label(
+            db, UserNotification.Action.user_created
+        ):
+            asyncio.ensure_future(
+                notify(
+                    action=UserNotification.Action.user_created,
+                    message=notification.message,
+                    user=db_user,
+                    by=None,
+                )
+            )
     else:
-        crud.update_user(
-            db,
-            user,
-            UserModify(
-                username=tg_user.username,
-                is_telegram_premium=tg_user.is_premium or False,
-            ),
+        # обновляем его данные если они изменились
+        upd_user = UserModify(
+            username=tg_user.username,
+            is_telegram_premium=tg_user.is_premium or False,
         )
+        if (
+            upd_user.username != tg_user.username
+            or upd_user.is_telegram_premium != tg_user.is_premium
+        ):
+            crud.update_user(
+                db,
+                db_user,
+                upd_user,
+            )
+            marznode.operations.update_user(user=db_user)
+            if notification := crud.get_notification_by_label(
+                db, UserNotification.Action.user_updated
+            ):
+                asyncio.ensure_future(
+                    notify(
+                        action=UserNotification.Action.user_updated,
+                        message=notification.message,
+                        user=db_user,
+                        by=None,
+                    )
+                )
 
-    return user
+    return db_user
 
 
 def plural_days(days: int):

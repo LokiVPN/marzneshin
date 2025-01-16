@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 
 from app.config import NOTIFY_DAYS_LEFT
-from app.db import GetDB
+from app.db import GetDB, crud
 from app.db.models import User
 from app.models.notification import UserNotification
 from app.models.user import UserResponse
@@ -34,10 +34,15 @@ async def expire_days_reached():
             User.expire_date.isnot(None),
             User.expire_date.between(cleft, cright),
         )
-        for user in users:
-            asyncio.ensure_future(
-                notify(
-                    action=UserNotification.Action.reached_days_left,
-                    user=UserResponse.model_validate(user),
+
+        if notification := crud.get_notification_by_label(
+            db, UserNotification.Action.reached_days_left
+        ):
+            for user in users:
+                asyncio.ensure_future(
+                    notify(
+                        action=UserNotification.Action.reached_days_left,
+                        user=UserResponse.model_validate(user),
+                        message=notification.message,
+                    )
                 )
-            )

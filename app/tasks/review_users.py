@@ -7,6 +7,7 @@ from app import marznode
 from app.db import (
     GetDB,
     get_users,
+    crud,
 )
 from app.models.notification import UserNotification
 from app.models.user import (
@@ -25,26 +26,29 @@ logger = logging.getLogger(__name__)
 async def review_users():
     now = datetime.utcnow()
     with GetDB() as db:
-        for user in get_users(db, activated=True, is_active=False):
-            """looking for expired/to be limited users who are still active"""
+        if notification := crud.get_notification_by_label(
+            db, UserNotification.Action.reached_usage_percent
+        ):
+            for user in get_users(db, activated=True, is_active=False):
+                """looking for expired/to be limited users who are still active"""
+                marznode.operations.update_user(user, remove=True)
+                user.activated = False
+                db.commit()
+                db.refresh(user)
 
-            marznode.operations.update_user(user, remove=True)
-            user.activated = False
-            db.commit()
-            db.refresh(user)
-
-            asyncio.ensure_future(
-                notify(
-                    action=UserNotification.Action.user_deactivated,
-                    user=UserResponse.model_validate(user),
+                asyncio.ensure_future(
+                    notify(
+                        action=UserNotification.Action.user_deactivated,
+                        user=UserResponse.model_validate(user),
+                        message=notification.message,
+                    )
                 )
-            )
 
-            logger.info(
-                "User `%s` activation state changed to `%s`",
-                user.username,
-                str(user.activated),
-            )
+                logger.info(
+                    "User `%s` activation state changed to `%s`",
+                    user.username,
+                    str(user.activated),
+                )
 
         for user in get_users(
             db,

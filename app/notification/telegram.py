@@ -21,9 +21,7 @@ async def send_message(
     if not (bot := await BotManager.get_instance()):
         return
 
-    for recipient_id in (TELEGRAM_LOGGER_CHANNEL_ID or []) + [
-        chat_id
-    ]:
+    for recipient_id in (TELEGRAM_LOGGER_CHANNEL_ID or []) + [chat_id]:
         if not recipient_id:
             continue
         try:
@@ -37,7 +35,9 @@ async def send_message(
 
 
 async def send_notification(notif: Notification):
-    formatted_message = render_template_string(notif.message, notif.model_dump())
+    formatted_message = render_template_string(
+        notif.message, notif.model_dump()
+    )
     if isinstance(notif, UserNotification):
         await send_message(chat_id=notif.user.id, message=formatted_message)
     else:

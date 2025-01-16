@@ -72,9 +72,8 @@ def get_notification_users(
     """
     Get notification users
     """
-    query = (
-        db.query(NotificationTarget)
-        .filter(NotificationTarget.notification_id == notification.id)
+    query = db.query(NotificationTarget).filter(
+        NotificationTarget.notification_id == notification.id
     )
 
     return paginate(query)
@@ -134,6 +133,7 @@ async def start_notification(
         asyncio.ensure_future(
             notify(
                 action=notification.action,
+                message=notification.message,
                 user=UserResponse.model_validate(user),
                 by=admin,
             )

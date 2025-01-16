@@ -38,12 +38,12 @@ class UserNotification(Notification):
 
 class UserCreated(UserNotification):
     action: UserNotification.Action = UserNotification.Action.user_created
-    by: Admin
+    by: Optional[Admin] = None
 
 
 class UserUpdated(UserNotification):
     action: UserNotification.Action = UserNotification.Action.user_updated
-    by: Admin
+    by: Optional[Admin] = None
 
 
 class UserActivated(UserNotification):

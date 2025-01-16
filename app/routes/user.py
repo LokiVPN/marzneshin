@@ -142,11 +142,17 @@ async def add_user(new_user: UserCreate, db: DBDep, admin: AdminDep):
     user = UserResponse.model_validate(db_user)
     marznode.operations.update_user(user=db_user)
 
-    asyncio.ensure_future(
-        notify(
-            action=UserNotification.Action.user_created, user=user, by=admin
+    if notification := crud.get_notification_by_label(
+        db, UserNotification.Action.user_updated
+    ):
+        asyncio.ensure_future(
+            notify(
+                action=UserNotification.Action.user_updated,
+                message=notification.message,
+                user=db_user,
+                by=admin,
+            )
         )
-    )
 
     logger.info("New user `%s` added", db_user.username)
     return user
@@ -251,13 +257,17 @@ async def modify_user(
         db_user.activated = db_user.is_active
         db.commit()
 
-    asyncio.ensure_future(
-        notify(
-            action=UserNotification.Action.user_updated,
-            user=UserResponse.model_validate(db_user),
-            by=admin,
+    if notification := crud.get_notification_by_label(
+        db, UserNotification.Action.user_updated
+    ):
+        asyncio.ensure_future(
+            notify(
+                action=UserNotification.Action.user_updated,
+                user=UserResponse.model_validate(db_user),
+                message=notification.message,
+                by=admin,
+            )
         )
-    )
 
     logger.info("User `%s` modified", db_user.username)
 
@@ -268,13 +278,15 @@ async def modify_user(
             else UserNotification.Action.user_deactivated
         )
 
-        asyncio.ensure_future(
-            notify(
-                action=action,
-                user=UserResponse.model_validate(db_user),
-                by=admin,
+        if notification := crud.get_notification_by_label(db, action):
+            asyncio.ensure_future(
+                notify(
+                    action=action,
+                    user=UserResponse.model_validate(db_user),
+                    message=notification.message,
+                    by=admin,
+                )
             )
-        )
 
         logger.info(
             "User `%s` activation changed from `%s` to `%s`",
@@ -305,11 +317,17 @@ async def remove_user(
     user = UserResponse.model_validate(db_user)
     db.expunge(db_user)
 
-    asyncio.ensure_future(
-        notify(
-            action=UserNotification.Action.user_deleted, user=user, by=admin
+    if notification := crud.get_notification_by_label(
+        db, UserNotification.Action.user_deleted
+    ):
+        asyncio.ensure_future(
+            notify(
+                action=UserNotification.Action.user_deleted,
+                user=UserResponse.model_validate(db_user),
+                message=notification.message,
+                by=admin,
+            )
         )
-    )
 
     logger.info("User %s deleted", db_user.username)
     return {}
@@ -353,13 +371,17 @@ async def reset_user_data_usage(
 
     user = UserResponse.model_validate(db_user)
 
-    asyncio.ensure_future(
-        notify(
-            action=UserNotification.Action.data_usage_reset,
-            user=user,
-            by=admin,
+    if notification := crud.get_notification_by_label(
+        db, UserNotification.Action.data_usage_reset
+    ):
+        asyncio.ensure_future(
+            notify(
+                action=UserNotification.Action.data_usage_reset,
+                user=UserResponse.model_validate(db_user),
+                message=notification.message,
+                by=admin,
+            )
         )
-    )
 
     logger.info("User `%s`'s usage was reset", db_user.username)
 
@@ -389,11 +411,17 @@ async def enable_user(
 
     user = UserResponse.model_validate(db_user)
 
-    asyncio.ensure_future(
-        notify(
-            action=UserNotification.Action.user_enabled, user=user, by=admin
+    if notification := crud.get_notification_by_label(
+        db, UserNotification.Action.user_enabled
+    ):
+        asyncio.ensure_future(
+            notify(
+                action=UserNotification.Action.user_enabled,
+                user=UserResponse.model_validate(db_user),
+                message=notification.message,
+                by=admin,
+            )
         )
-    )
 
     logger.info("User `%s` has been enabled", db_user.username)
 
@@ -418,17 +446,21 @@ async def disable_user(
 
     marznode.operations.update_user(db_user, remove=True)
 
-    user = UserResponse.model_validate(db_user)
-
-    asyncio.ensure_future(
-        notify(
-            action=UserNotification.Action.user_disabled, user=user, by=admin
+    if notification := crud.get_notification_by_label(
+        db, UserNotification.Action.user_disabled
+    ):
+        asyncio.ensure_future(
+            notify(
+                action=UserNotification.Action.user_disabled,
+                user=UserResponse.model_validate(db_user),
+                message=notification.message,
+                by=admin,
+            )
         )
-    )
 
     logger.info("User `%s` has been disabled", db_user.username)
 
-    return user
+    return db_user
 
 
 @router.post("/{username}/revoke_sub", response_model=UserResponse)
@@ -447,19 +479,21 @@ async def revoke_user_subscription(
         marznode.operations.update_user(db_user, remove=True)
         marznode.operations.update_user(db_user)
 
-    user = UserResponse.model_validate(db_user)
-
-    asyncio.ensure_future(
-        notify(
-            action=UserNotification.Action.subscription_revoked,
-            user=user,
-            by=admin,
+    if notification := crud.get_notification_by_label(
+        db, UserNotification.Action.subscription_revoked
+    ):
+        asyncio.ensure_future(
+            notify(
+                action=UserNotification.Action.subscription_revoked,
+                user=UserResponse.model_validate(db_user),
+                message=notification.message,
+                by=admin,
+            )
         )
-    )
 
     logger.info("User %s subscription revoked", db_user.username)
 
-    return user
+    return db_user
 
 
 @router.get("/{username}/usage", response_model=UserUsageSeriesResponse)

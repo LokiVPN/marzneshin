@@ -556,9 +556,7 @@ class Notification(Base):
     id = Column(Integer, primary_key=True)
     label = Column(String(128), nullable=False, unique=True)
     message = Column(String(1024), nullable=False)
-    targets = relationship(
-        "NotificationTarget", back_populates="notification"
-    )
+    targets = relationship("NotificationTarget", back_populates="notification")
     action = Column(Enum(UserNotification.Action), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     started_at = Column(DateTime)
@@ -570,4 +568,8 @@ class Notification(Base):
 
     @property
     def user_ids(self):
-        return [target.user.id for target in self.targets if not target.user.removed]
+        return [
+            target.user.id
+            for target in self.targets
+            if not target.user.removed
+        ]
