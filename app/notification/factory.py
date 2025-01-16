@@ -64,7 +64,7 @@ class UserNotificationFactory(NotificationFactory):
         user: UserResponse,
         message: Optional[str] = None,
         by: Optional[Admin] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> UserNotification:
         notification_class = self.notification_classes.get(action)
         return notification_class(user=user, by=by, message=message, **kwargs)
@@ -81,7 +81,9 @@ class NotificationStrategy:
         if isinstance(action, UserNotification.Action):
             with GetDB() as db:
                 if notif := crud.get_notification_by_label(db, action):
-                    return self.user_factory.create_notification(action, message=notif.message, **kwargs)
+                    return self.user_factory.create_notification(
+                        action, message=notif.message, **kwargs
+                    )
                 return self.user_factory.create_notification(action, **kwargs)
         elif isinstance(action, AdminNotif.Action):
             return self.admin_factory.create_notification(action, **kwargs)

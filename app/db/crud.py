@@ -1152,7 +1152,9 @@ def get_notification_by_id(db: Session, notification_id: int):
     )
 
 
-def get_notification_by_label(db: Session, label: str) -> Optional[Notification]:
+def get_notification_by_label(
+    db: Session, label: str
+) -> Optional[Notification]:
     return db.query(Notification).filter(Notification.label == label).first()
 
 
