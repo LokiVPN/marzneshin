@@ -27,18 +27,15 @@ dp = Dispatcher()
 
 
 class Middleware(BaseMiddleware):
-    def __init__(self) -> None:
-        with GetDB() as db:
-            self.db = db
-
     async def __call__(
         self,
         handler: Callable[[Message, dict[str, any]], Awaitable[any]],
         event: Message,
         data: dict[str, any],
     ) -> any:
-        data["db"] = self.db
-        data["user"] = crud.get_user_by_id(self.db, event.from_user.id)
+        with GetDB() as db:
+            data["db"] = db
+            data["user"] = crud.get_user_by_id(db, event.from_user.id)
         return await handler(event, data)
 
 
