@@ -28,12 +28,12 @@ from app.models.user import UserResponse
 
 class NotificationFactory(ABC):
     @abstractmethod
-    def create_notification(self, action: Enum, **kwargs: Any) -> Notification:
+    def create_notification(self, action: Enum, message: str, user: UserResponse, **kwargs: Any) -> Notification:
         raise NotImplementedError()
 
 
 class AdminNotificationFactory(NotificationFactory):
-    def create_notification(self, action: Enum, **kwargs: Any) -> Notification:
+    def create_notification(self, action: Enum, message: str, user: UserResponse, **kwargs: Any) -> AdminNotif:
         pass
 
 
@@ -61,8 +61,8 @@ class UserNotificationFactory(NotificationFactory):
     def create_notification(
         self,
         action: UserNotification.Action,
+        message: str,
         user: UserResponse,
-        message: Optional[str] = None,
         by: Optional[Admin] = None,
         **kwargs: Any,
     ) -> UserNotification:
@@ -76,17 +76,12 @@ class NotificationStrategy:
         self.admin_factory = AdminNotificationFactory()
 
     def create_notification(
-        self, action: Enum, **kwargs: Any
+        self, action: Enum, message: str, **kwargs: Any
     ) -> Union[UserNotification, AdminNotif]:
         if isinstance(action, UserNotification.Action):
-            with GetDB() as db:
-                if notif := crud.get_notification_by_label(db, action):
-                    return self.user_factory.create_notification(
-                        action, message=notif.message, **kwargs
-                    )
-                return self.user_factory.create_notification(action, **kwargs)
+            return self.user_factory.create_notification(action, message, **kwargs)
         elif isinstance(action, AdminNotif.Action):
-            return self.admin_factory.create_notification(action, **kwargs)
+            return self.admin_factory.create_notification(action, message, **kwargs)
 
 
 @lru_cache(maxsize=1)
