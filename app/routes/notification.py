@@ -122,8 +122,6 @@ async def start_notification(
             status_code=400, detail="Only custom notifications can be started"
         )
 
-    logging.info(f"Targets: {len(notification.targets)}, {notification.targets}")
-
     for target in notification.targets:
         asyncio.ensure_future(
             notify(

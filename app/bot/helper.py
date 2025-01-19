@@ -48,13 +48,17 @@ def get_or_create_user(
 
         db_user = crud.create_user(db, new_user)
         marznode.operations.update_user(user=db_user)
-        asyncio.ensure_future(
-            notify(
-                action=UserNotification.Action.user_created,
-                user=db_user,
-                by=None,
+
+        action = UserNotification.Action.user_created
+        if template := crud.get_notification_by_label(db, action.value):
+            asyncio.ensure_future(
+                notify(
+                    action=action,
+                    message=template.message,
+                    user=db_user,
+                    by=None,
+                )
             )
-        )
     else:
         # обновляем его данные если они изменились
         upd_user = UserModify(
@@ -71,13 +75,6 @@ def get_or_create_user(
                 upd_user,
             )
             marznode.operations.update_user(user=db_user)
-            asyncio.ensure_future(
-                notify(
-                    action=UserNotification.Action.user_updated,
-                    user=db_user,
-                    by=None,
-                )
-            )
 
     return db_user
 

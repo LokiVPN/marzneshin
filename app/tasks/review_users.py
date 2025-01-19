@@ -33,12 +33,15 @@ async def review_users():
             db.commit()
             db.refresh(user)
 
-            asyncio.ensure_future(
-                notify(
-                    action=UserNotification.Action.user_deactivated,
-                    user=UserResponse.model_validate(user),
+            action = UserNotification.Action.user_deactivated
+            if template := crud.get_notification_by_label(db, action.value):
+                asyncio.ensure_future(
+                    notify(
+                        action=action,
+                        message=template.message,
+                        user=UserResponse.model_validate(user),
+                    )
                 )
-            )
 
             logger.info(
                 "User `%s` activation state changed to `%s`",

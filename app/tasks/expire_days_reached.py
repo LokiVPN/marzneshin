@@ -35,10 +35,13 @@ async def expire_days_reached():
             User.expire_date.between(cleft, cright),
         )
 
-        for user in users:
-            asyncio.ensure_future(
-                notify(
-                    action=UserNotification.Action.reached_days_left,
-                    user=UserResponse.model_validate(user),
+        action = UserNotification.Action.reached_days_left
+        if template := crud.get_notification_by_label(db, action.value):
+            for user in users:
+                asyncio.ensure_future(
+                    notify(
+                        action=action,
+                        message=template.message,
+                        user=UserResponse.model_validate(user),
+                    )
                 )
-            )
