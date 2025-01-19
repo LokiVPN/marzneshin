@@ -33,7 +33,8 @@ export function ThemeProvider({
     useEffect(() => {
         const root = window.document.documentElement
 
-        root.classList.remove("light", "dark")
+        root.classList.remove("light", "dark");
+        root.removeAttribute('data-color-mode');
 
         if (theme === "system") {
             const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
@@ -42,10 +43,12 @@ export function ThemeProvider({
                 : "light"
 
             root.classList.add(systemTheme)
+            root.setAttribute('data-color-mode', systemTheme);
             return
         }
 
         root.classList.add(theme)
+        root.setAttribute('data-color-mode', theme);
     }, [theme])
 
     const value = {

@@ -1,3 +1,5 @@
+import { UserType } from "@marzneshin/modules/users";
+
 export interface NotificationType {
     id: number;
     label: string;
@@ -8,6 +10,16 @@ export interface NotificationType {
     started_at: string | Date | null;
     finished_at: string | Date | null;
     completed: boolean;
+}
+
+export interface NotificationTargetType {
+    user: UserType,
+    sent_at: string | Date | null;
+    skipped: boolean;
+}
+
+export interface TargetProp {
+    target: NotificationTargetType;
 }
 
 export enum NotificationAction {

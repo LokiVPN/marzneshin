@@ -14,7 +14,7 @@ import {
 import { FC } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  NotificationsUsersTable,
+  NotificationTargetsTable,
   NotificationDetailTable,
   NotificationType,
   useNotificationTestCmd,
@@ -63,15 +63,15 @@ export const NotificationSettingsDialog: FC<NotificationSettingsDialogProps> = (
                   <TabsTrigger className="w-full" value="info">
                     {t("info")}
                   </TabsTrigger>
-                  <TabsTrigger className="w-full" value="users">
-                    {t("users")}
+                  <TabsTrigger className="w-full" value="targets">
+                    {t("targets")}
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="info" className="h-full">
                   <NotificationDetailTable notification={entity} />
                 </TabsContent>
-                <TabsContent value="users" className="h-full">
-                  <NotificationsUsersTable notification={entity} />
+                <TabsContent value="targets" className="h-full">
+                  <NotificationTargetsTable notification={entity} />
                 </TabsContent>
               </Tabs>
             </CardContent>

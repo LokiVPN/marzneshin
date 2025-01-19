@@ -1,12 +1,11 @@
 import asyncio
+import logging
 from datetime import datetime
 
-import sqlalchemy
 from fastapi import APIRouter, Query
 from fastapi import HTTPException
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination.links import Page
-from sqlalchemy.orm import aliased
 
 from app.db import crud
 from app.db.models import Notification, User, NotificationTarget
@@ -46,13 +45,7 @@ def add_notification(
     - **action** notification action
     - **user_ids** list of user ids
     """
-    try:
-        return crud.create_notification(db, new_notification)
-    except sqlalchemy.exc.IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=409, detail="Notification by this label already exists"
-        )
+    return crud.create_notification(db, new_notification)
 
 
 @router.get("/{id}", response_model=DBNotificationResponse)
@@ -119,7 +112,7 @@ async def start_notification(
     """
     Start Notification with id
     """
-    if len(notification.user_ids):
+    if not len(notification.user_ids):
         raise HTTPException(
             status_code=400, detail="No users to send notification"
         )
@@ -129,12 +122,14 @@ async def start_notification(
             status_code=400, detail="Only custom notifications can be started"
         )
 
-    for user in notification.users:
+    logging.info(f"Targets: {len(notification.targets)}, {notification.targets}")
+
+    for target in notification.targets:
         asyncio.ensure_future(
             notify(
                 action=notification.action,
                 message=notification.message,
-                user=UserResponse.model_validate(user),
+                user=UserResponse.model_validate(target.user),
                 by=admin,
             )
         )

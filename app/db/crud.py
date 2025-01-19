@@ -1135,6 +1135,7 @@ def create_notification(
     db_notification = Notification(
         label=notification.label,
         action=notification.action,
+        message=notification.message,
     )
     for user_id in notification.user_ids:
         db_notification.targets.append(NotificationTarget(user_id=user_id))

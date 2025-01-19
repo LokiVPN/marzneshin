@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetch } from "@marzneshin/common/utils";
-import { UserType } from "@marzneshin/modules/users";
+import type { NotificationTargetType } from "@marzneshin/modules/notifications";
 import type {
     DoubleEntityQueryKeyType,
     UseEntityQueryProps,
@@ -11,7 +11,7 @@ interface UseNotificationUsersQueryProps extends UseEntityQueryProps {
     notificationId: number;
 }
 
-export async function fetchNotificationUsers({ queryKey }: DoubleEntityQueryKeyType): FetchEntityReturn<UserType> {
+export async function fetchNotificationUsers({ queryKey }: DoubleEntityQueryKeyType): FetchEntityReturn<NotificationTargetType> {
     const pagination = queryKey[2];
     const primaryFilter = queryKey[3];
     return fetch(`/notifications/${queryKey[1]}/users`, {

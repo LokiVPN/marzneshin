@@ -17,7 +17,7 @@ import {
 } from "@marzneshin/modules/notifications";
 import { useTranslation } from "react-i18next";
 import { useMutationDialog, MutationDialogProps } from "@marzneshin/common/hooks";
-import { ActionField, LabelField, MessageField } from "./fields";
+import { ActionField, LabelField, MessageField, UsersField } from "./fields";
 
 
 export const MutationDialog: FC<MutationDialogProps<NotificationType>> = ({
@@ -57,6 +57,7 @@ export const MutationDialog: FC<MutationDialogProps<NotificationType>> = ({
                         <LabelField disabled={!!entity} />
                         <ActionField disabled={!!entity} />
                         <MessageField />
+                        <UsersField />
                         <Button
                             className="mt-3 w-full font-semibold"
                             type="submit"
