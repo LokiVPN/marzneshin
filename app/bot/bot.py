@@ -1,19 +1,25 @@
 import logging
+from datetime import timedelta, datetime
+from enum import unique
 from typing import Callable, Awaitable
 
-from aiogram import Dispatcher, BaseMiddleware
+from aiogram import Dispatcher, BaseMiddleware, F, Bot
+from aiogram.enums import ContentType
 from aiogram.filters import CommandStart, CommandObject, Command
-from aiogram.types import Message
-from sqlalchemy.orm import Session
+from aiogram.filters.callback_data import CallbackData
+from aiogram.types import Message, PreCheckoutQuery, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, \
+    CopyTextButton, CallbackQuery
+from aiogram.utils.deep_linking import create_start_link
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 
-from app.bot.helper import get_or_create_user
-from app.bot.messages import (
-    start_message,
-    help_message,
-    terms_of_service_message,
-)
+from app.bot.helper import get_or_create_user, decode_invoice_payload, create_invoice
 from app.db import crud, User
 from app.db import GetDB
+from app.models.node import NodeStatus
+from app.models.telegram import Currency
+from app.models.user import UserResponse, UserModify
+from app.templates import render_template_string
 
 logger = logging.getLogger(__name__)
 dp = Dispatcher()
@@ -37,7 +43,7 @@ dp.message.outer_middleware(Middleware())
 
 @dp.message(CommandStart(deep_link=True))
 async def command_start__deep_handler(
-    message: Message, command: CommandObject, db: Session, user: User
+    message: Message, command: CommandObject, db: Session, user: User = None
 ) -> None:
     """
     This handler receives messages with `/start` command
@@ -45,12 +51,27 @@ async def command_start__deep_handler(
     if not user:
         user = get_or_create_user(db, message.from_user, command.args)
 
-    await message.answer(start_message(user.username))
+    if template := crud.get_notification_by_label(db, "bot.start"):
+        await message.answer(
+            render_template_string(template.message, {"user": UserResponse.model_validate(user)}),
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[[
+                    InlineKeyboardButton(text="Открыть приложение",
+                                         web_app=WebAppInfo(url="https://loki-connect.ru/webapp/")),
+                    InlineKeyboardButton(text="Скопировать подписку", copy_text=CopyTextButton(
+                        text=f"https://loki-connect.ru{user.subscription_url}")),
+                    InlineKeyboardButton(text="Реферальная ссылка", copy_text=CopyTextButton(
+                        text=await create_start_link(message.bot, str(user.id), encode=True)))
+                ]]
+            )
+        )
+    else:
+        logger.error("Template not found")
 
 
 @dp.message(CommandStart())
 async def command_start_handler(
-    message: Message, db: Session, user: User
+    message: Message, db: Session, user: User = None
 ) -> None:
     """
     This handler receives messages with `/start` command
@@ -58,20 +79,110 @@ async def command_start_handler(
     if not user:
         user = get_or_create_user(db, message.from_user)
 
-    await message.answer(start_message(user.username))
+    if template := crud.get_notification_by_label(db, "bot.start"):
+        await message.answer(
+            render_template_string(template.message, {"user": UserResponse.model_validate(user)}),
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[[
+                    InlineKeyboardButton(text="Открыть приложение", web_app=WebAppInfo(url="https://loki-connect.ru/webapp/")),
+                    InlineKeyboardButton(text="Скопировать подписку", copy_text=CopyTextButton(text=f"https://loki-connect.ru{user.subscription_url}")),
+                    InlineKeyboardButton(text="Реферальная ссылка", copy_text=CopyTextButton(text=await create_start_link(message.bot, str(user.id), encode=True)))
+                ]]
+            )
+        )
+    else:
+        logger.error("Template not found")
 
 
 @dp.message(Command("help"))
-async def command_help_handler(message: Message) -> None:
+async def command_help_handler(message: Message, db: Session, user: User) -> None:
     """
     This handler receives messages with `/help` command
     """
-    await message.answer(help_message())
+    if template := crud.get_notification_by_label(db, "bot.help"):
+        await message.answer(render_template_string(template.message, {"user": UserResponse.model_validate(user)}))
+    else:
+        logger.error("Template not found")
 
 
 @dp.message(Command("terms"))
-async def command_terms_handler(message: Message) -> None:
+async def command_terms_handler(message: Message, db: Session, user: User) -> None:
     """
     This handler receives messages with `/terms` command
     """
-    await message.answer(terms_of_service_message())
+    if template := crud.get_notification_by_label(db, "bot.terms"):
+        await message.answer(render_template_string(template.message, {"user": UserResponse.model_validate(user)}))
+    else:
+        logger.error("Template not found")
+
+
+@dp.pre_checkout_query()
+async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: Bot, db: Session):
+    if not crud.get_user_by_id(db, pre_checkout_query.from_user.id):
+        logger.error(f"User {pre_checkout_query.from_user.id} not found")
+        await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=False, error_message="Пользователь не найден")
+        return
+    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
+
+
+@dp.message(F.content_type == ContentType.SUCCESSFUL_PAYMENT)
+async def process_successful_payment(message: Message, db: Session):
+    try:
+        user_id, _, duration = decode_invoice_payload(message.successful_payment.invoice_payload)
+        user = crud.get_user_by_id(db, user_id)
+        if not user:
+            raise ValueError(f"User {user_id} not found")
+        crud.extend_user_sub(db, user, timedelta(days=duration))
+        crud.update_user(
+            db, user,
+            UserModify(
+                username=user.username,
+                last_payment_at=datetime.utcnow(),
+                last_provider_payment_charge_id=message.successful_payment.provider_payment_charge_id,
+                last_telegram_payment_charge_id=message.successful_payment.telegram_payment_charge_id,
+            )
+     )
+    except Exception as e:
+        logger.error(e)
+        await message.answer("Упс, что-то пошло не так...")
+
+
+class PaymentCallback(CallbackData, prefix="payment"):
+    duration: int
+
+
+@dp.message(Command("payments"))
+async def command_payments_handler(message: Message, db: Session, user: User) -> None:
+    """
+    This handler receives messages with `/payments` command
+    """
+    if template := crud.get_notification_by_label(db, "bot.payments"):
+        await message.answer(
+            render_template_string(template.message, {"user": UserResponse.model_validate(user)}),
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[[
+                    InlineKeyboardButton(text="Оплатить на 30 дней", callback_data=PaymentCallback(duration=30).pack()),
+                    InlineKeyboardButton(text="Оплатить на 90 дней", callback_data=PaymentCallback(duration=90).pack()),
+                    InlineKeyboardButton(text="Оплатить на 180 дней", callback_data=PaymentCallback(duration=180).pack()),
+                    InlineKeyboardButton(text="Оплатить на 365 дней", callback_data=PaymentCallback(duration=365).pack()),
+                ]]
+            )
+        )
+    else:
+        logger.error("Template not found")
+
+
+
+@dp.callback_query(PaymentCallback.filter())
+async def process_payment_callback(query: CallbackQuery, callback_data:  PaymentCallback, db: Session, user: User):
+    duration = callback_data.duration
+    if not user:
+        logger.error(f"User {query.from_user.id} not found")
+        return
+    try:
+        await create_invoice(query.bot, user, Currency.RUB, duration)
+    except Exception as e:
+        logger.error(e)
+        await query.answer("Упс, что-то пошло не так...")
+
+
