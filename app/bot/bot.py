@@ -51,9 +51,11 @@ async def command_start__deep_handler(
     if not user:
         user = get_or_create_user(db, message.from_user, command.args)
 
+    user = UserResponse.model_validate(user)
+
     if template := crud.get_notification_by_label(db, "bot.start"):
         await message.answer(
-            render_template_string(template.message, {"user": UserResponse.model_validate(user)}),
+            render_template_string(template.message, {"user": user}),
             reply_markup=InlineKeyboardMarkup(
                 inline_keyboard=[[
                     InlineKeyboardButton(text="Открыть приложение",
@@ -79,9 +81,11 @@ async def command_start_handler(
     if not user:
         user = get_or_create_user(db, message.from_user)
 
+    user = UserResponse.model_validate(user)
+
     if template := crud.get_notification_by_label(db, "bot.start"):
         await message.answer(
-            render_template_string(template.message, {"user": UserResponse.model_validate(user)}),
+            render_template_string(template.message, {"user": user}),
             reply_markup=InlineKeyboardMarkup(
                 inline_keyboard=[[
                     InlineKeyboardButton(text="Открыть приложение", web_app=WebAppInfo(url="https://loki-connect.ru/webapp/")),
