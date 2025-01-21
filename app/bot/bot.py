@@ -107,6 +107,9 @@ async def command_start_handler(
     """
     This handler receives messages with `/start` command
     """
+    logger.info(
+        f"User {message.from_user.id} started the bot, {user_db.username}"
+    )
     if not user_db:
         user_db = get_or_create_user(db, message.from_user)
 
@@ -248,19 +251,25 @@ async def command_payments_handler(
                             text="Оплатить на 30 дней",
                             callback_data=PaymentCallback(duration=30).pack(),
                         ),
+                    ],
+                    [
                         InlineKeyboardButton(
                             text="Оплатить на 90 дней",
                             callback_data=PaymentCallback(duration=90).pack(),
                         ),
+                    ],
+                    [
                         InlineKeyboardButton(
                             text="Оплатить на 180 дней",
                             callback_data=PaymentCallback(duration=180).pack(),
                         ),
+                    ],
+                    [
                         InlineKeyboardButton(
                             text="Оплатить на 365 дней",
                             callback_data=PaymentCallback(duration=365).pack(),
                         ),
-                    ]
+                    ],
                 ]
             ),
         )
