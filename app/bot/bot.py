@@ -45,7 +45,7 @@ class Middleware(BaseMiddleware):
     ) -> any:
         with GetDB() as db:
             data["db"] = db
-            data["user"] = crud.get_user_by_id(db, event.from_user.id)
+            data["user_db"] = crud.get_user_by_id(db, event.from_user.id)
         return await handler(event, data)
 
 
