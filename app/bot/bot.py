@@ -190,21 +190,22 @@ async def command_terms_handler(
 
 @dp.pre_checkout_query()
 async def process_pre_checkout_query(
-    pre_checkout_query: PreCheckoutQuery, bot: Bot, db: Session
+    pre_checkout_query: PreCheckoutQuery, bot: Bot
 ):
-    if not crud.get_user_by_id(db, pre_checkout_query.from_user.id):
-        logger.error(f"User {pre_checkout_query.from_user.id} not found")
-        await bot.answer_pre_checkout_query(
-            pre_checkout_query.id,
-            ok=False,
-            error_message="Пользователь не найден",
-        )
-        return
-    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
+    with GetDB() as db:
+        if not crud.get_user_by_id(db, pre_checkout_query.from_user.id):
+            logger.error(f"User {pre_checkout_query.from_user.id} not found")
+            await bot.answer_pre_checkout_query(
+                pre_checkout_query.id,
+                ok=False,
+                error_message="Пользователь не найден",
+            )
+            return
+        await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
 
 
 @dp.message(F.content_type == ContentType.SUCCESSFUL_PAYMENT)
-async def process_successful_payment(message: Message, db: Session):
+async def process_successful_payment(message: Message, db: Session, user_db: User):
     try:
         user_id, _, duration = decode_invoice_payload(
             message.successful_payment.invoice_payload
@@ -270,9 +271,8 @@ async def process_payment_callback(
             logger.error(f"User {query.from_user.id} not found")
             return
 
-        await create_invoice(query.bot, user_db, Currency.RUB, callback_data.duration)
-        # try:
-        #
-        # except Exception as e:
-        #     logger.error(e)
-        #     await query.answer("Упс, что-то пошло не так...")
+        try:
+          await create_invoice(query.bot, user_db, Currency.RUB, callback_data.duration)
+        except Exception as e:
+            logger.error(e)
+            await query.answer("Упс, что-то пошло не так...")
