@@ -244,7 +244,7 @@ async def command_payments_handler(
         builder = InlineKeyboardBuilder()
         for duration in [30, 90, 180, 365]:
             builder.button(
-                text=f"Оплатить на {duration} дней",
+                text=f"{duration} дней",
                 callback_data=PaymentCallback(user_id=user_db.id, duration=duration),
             )
 
@@ -264,17 +264,15 @@ async def process_payment_callback(
     query: CallbackQuery,
     callback_data: PaymentCallback,
 ):
-    logger.info(
-        f"User {query.from_user.id} requested payment  {callback_data}"
-    )
-    duration = callback_data.duration
     with GetDB() as db:
-        user_db = crud.get_user_by_id(db, query.from_user.id)
+        user_db = crud.get_user_by_id(db, callback_data.user_id)
         if not user_db:
             logger.error(f"User {query.from_user.id} not found")
             return
-        try:
-            await create_invoice(query.bot, user_db, Currency.RUB, duration)
-        except Exception as e:
-            logger.error(e)
-            await query.answer("Упс, что-то пошло не так...")
+
+        await create_invoice(query.bot, user_db, Currency.RUB, callback_data.duration)
+        # try:
+        #
+        # except Exception as e:
+        #     logger.error(e)
+        #     await query.answer("Упс, что-то пошло не так...")
