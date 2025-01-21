@@ -17,6 +17,7 @@ from aiogram.types import (
     CallbackQuery,
 )
 from aiogram.utils.deep_linking import create_start_link
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
@@ -228,6 +229,7 @@ async def process_successful_payment(message: Message, db: Session):
 
 
 class PaymentCallback(CallbackData, prefix="payment"):
+    user_id: int
     duration: int
 
 
@@ -239,39 +241,19 @@ async def command_payments_handler(
     This handler receives messages with `/payments` command
     """
     if template := crud.get_notification_by_label(db, "bot.payments"):
+        builder = InlineKeyboardBuilder()
+        for duration in [30, 90, 180, 365]:
+            builder.button(
+                text=f"Оплатить на {duration} дней",
+                callback_data=PaymentCallback(user_id=user_db.id, duration=duration),
+            )
+
         await message.answer(
             render_template_string(
                 template.message,
                 {"user": UserResponse.model_validate(user_db)},
             ),
-            reply_markup=InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [
-                        InlineKeyboardButton(
-                            text="Оплатить на 30 дней",
-                            callback_data=PaymentCallback(duration=30).pack(),
-                        ),
-                    ],
-                    [
-                        InlineKeyboardButton(
-                            text="Оплатить на 90 дней",
-                            callback_data=PaymentCallback(duration=90).pack(),
-                        ),
-                    ],
-                    [
-                        InlineKeyboardButton(
-                            text="Оплатить на 180 дней",
-                            callback_data=PaymentCallback(duration=180).pack(),
-                        ),
-                    ],
-                    [
-                        InlineKeyboardButton(
-                            text="Оплатить на 365 дней",
-                            callback_data=PaymentCallback(duration=365).pack(),
-                        ),
-                    ],
-                ]
-            ),
+            reply_markup=builder.as_markup()
         )
     else:
         logger.error("Template not found")
@@ -283,7 +265,7 @@ async def process_payment_callback(
     callback_data: PaymentCallback,
 ):
     logger.info(
-        f"User {query.from_user.id} requested payment for {callback_data}"
+        f"User {query.from_user.id} requested payment  {callback_data}"
     )
     duration = callback_data.duration
     with GetDB() as db:
