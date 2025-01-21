@@ -283,12 +283,13 @@ async def process_payment_callback(
     callback_data: PaymentCallback,
 ):
     duration = callback_data.duration
-    user_db = crud.get_user_by_id(query.from_user.id)
-    if not user_db:
-        logger.error(f"User {query.from_user.id} not found")
-        return
-    try:
-        await create_invoice(query.bot, user_db, Currency.RUB, duration)
-    except Exception as e:
-        logger.error(e)
-        await query.answer("Упс, что-то пошло не так...")
+    with GetDB() as db:
+        user_db = crud.get_user_by_id(db, query.from_user.id)
+        if not user_db:
+            logger.error(f"User {query.from_user.id} not found")
+            return
+        try:
+            await create_invoice(query.bot, user_db, Currency.RUB, duration)
+        except Exception as e:
+            logger.error(e)
+            await query.answer("Упс, что-то пошло не так...")
