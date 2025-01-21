@@ -281,10 +281,9 @@ async def command_payments_handler(
 async def process_payment_callback(
     query: CallbackQuery,
     callback_data: PaymentCallback,
-    db: Session,
-    user_db: User,
 ):
     duration = callback_data.duration
+    user_db = crud.get_user_by_id(query.from_user.id)
     if not user_db:
         logger.error(f"User {query.from_user.id} not found")
         return
