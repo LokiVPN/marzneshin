@@ -741,7 +741,13 @@ def reset_user_data_usage(db: Session, dbuser: User):
     return dbuser
 
 
-def extend_user_sub(db: Session, dbuser: User, extend_time: timedelta):
+def extend_user_sub(
+    db: Session,
+    dbuser: User,
+    extend_time: timedelta,
+    last_provider_payment_charge_id: str = None,
+    last_telegram_payment_charge_id: str = None,
+):
     if dbuser.expire_date is None:
         dbuser.usage_duration += extend_time.total_seconds()
     elif dbuser.expire_date < datetime.utcnow():
@@ -749,6 +755,15 @@ def extend_user_sub(db: Session, dbuser: User, extend_time: timedelta):
         dbuser.activated = True
     else:
         dbuser.expire_date += extend_time
+
+    if last_provider_payment_charge_id or last_telegram_payment_charge_id:
+        dbuser.last_payment_at = datetime.utcnow()
+        dbuser.last_telegram_payment_charge_id = (
+            last_telegram_payment_charge_id
+        )
+        dbuser.last_provider_payment_charge_id = (
+            last_provider_payment_charge_id
+        )
     db.commit()
     db.refresh(dbuser)
     return dbuser

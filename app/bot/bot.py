@@ -205,7 +205,9 @@ async def process_pre_checkout_query(
 
 
 @dp.message(F.content_type == ContentType.SUCCESSFUL_PAYMENT)
-async def process_successful_payment(message: Message, db: Session, user_db: User):
+async def process_successful_payment(
+    message: Message, db: Session, user_db: User
+):
     try:
         user_id, _, duration = decode_invoice_payload(
             message.successful_payment.invoice_payload
@@ -213,17 +215,35 @@ async def process_successful_payment(message: Message, db: Session, user_db: Use
         user_db = crud.get_user_by_id(db, user_id)
         if not user_db:
             raise ValueError(f"User {user_id} not found")
-        crud.extend_user_sub(db, user_db, timedelta(days=duration))
-        crud.update_user(
+        user_db = crud.extend_user_sub(
             db,
             user_db,
-            UserModify(
-                username=user_db.username,
-                last_payment_at=datetime.utcnow(),
-                last_provider_payment_charge_id=message.successful_payment.provider_payment_charge_id,
-                last_telegram_payment_charge_id=message.successful_payment.telegram_payment_charge_id,
-            ),
+            timedelta(days=duration),
+            message.successful_payment.provider_payment_charge_id,
+            message.successful_payment.telegram_payment_charge_id,
         )
+        if user_db.invited_by:
+            inviter = crud.get_user_by_id(db, user_db.invited_by)
+            if inviter and (
+                template := crud.get_notification_by_label(db, "bot.invite")
+            ):
+                inviter = crud.extend_user_sub(
+                    db,
+                    inviter,
+                    timedelta(days=int(duration * 0.1)),
+                )
+                await message.bot.send_message(
+                    chat_id=inviter.id,
+                    text=render_template_string(
+                        template.message,
+                        {
+                            "from": UserResponse.model_validate(user_db),
+                            "user": UserResponse.model_validate(inviter),
+                        },
+                    ),
+                )
+
+        await message.bot.delete_message(user_id, message.message_id-1)
     except Exception as e:
         logger.error(e)
         await message.answer("Упс, что-то пошло не так...")
@@ -246,7 +266,9 @@ async def command_payments_handler(
         for duration in [30, 90, 180, 365]:
             builder.button(
                 text=f"{duration} дней",
-                callback_data=PaymentCallback(user_id=user_db.id, duration=duration),
+                callback_data=PaymentCallback(
+                    user_id=user_db.id, duration=duration
+                ),
             )
 
         await message.answer(
@@ -254,7 +276,7 @@ async def command_payments_handler(
                 template.message,
                 {"user": UserResponse.model_validate(user_db)},
             ),
-            reply_markup=builder.as_markup()
+            reply_markup=builder.as_markup(),
         )
     else:
         logger.error("Template not found")
@@ -272,7 +294,9 @@ async def process_payment_callback(
             return
 
         try:
-          await create_invoice(query.bot, user_db, Currency.RUB, callback_data.duration)
+            await create_invoice(
+                query.bot, user_db, Currency.RUB, callback_data.duration
+            )
         except Exception as e:
             logger.error(e)
             await query.answer("Упс, что-то пошло не так...")

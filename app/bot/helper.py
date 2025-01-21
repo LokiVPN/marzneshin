@@ -94,7 +94,9 @@ def plural_days(days: int):
 def encode_invoice_payload(
     user_id: int, currency: Currency, duration: int
 ) -> str:
-    return encode_payload(":".join([str(user_id), currency.value, str(duration)]))
+    return encode_payload(
+        ":".join([str(user_id), currency.value, str(duration)])
+    )
 
 
 def decode_invoice_payload(payload: str) -> tuple[int, Currency, int]:
