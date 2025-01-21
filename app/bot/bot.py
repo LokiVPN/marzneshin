@@ -282,6 +282,9 @@ async def process_payment_callback(
     query: CallbackQuery,
     callback_data: PaymentCallback,
 ):
+    logger.info(
+        f"User {query.from_user.id} requested payment for {callback_data}"
+    )
     duration = callback_data.duration
     with GetDB() as db:
         user_db = crud.get_user_by_id(db, query.from_user.id)
