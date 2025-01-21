@@ -1,6 +1,8 @@
 import asyncio
 from datetime import datetime, timedelta
 import logging
+from enum import StrEnum
+
 from aiogram.utils.payload import decode_payload, encode_payload
 from sqlalchemy.orm import Session
 from aiogram import types, Bot

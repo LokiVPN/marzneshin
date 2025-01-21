@@ -28,12 +28,16 @@ from app.models.user import UserResponse
 
 class NotificationFactory(ABC):
     @abstractmethod
-    def create_notification(self, action: Enum, message: str, user: UserResponse, **kwargs: Any) -> Notification:
+    def create_notification(
+        self, action: Enum, message: str, user: UserResponse, **kwargs: Any
+    ) -> Notification:
         raise NotImplementedError()
 
 
 class AdminNotificationFactory(NotificationFactory):
-    def create_notification(self, action: Enum, message: str, user: UserResponse, **kwargs: Any) -> AdminNotif:
+    def create_notification(
+        self, action: Enum, message: str, user: UserResponse, **kwargs: Any
+    ) -> AdminNotif:
         pass
 
 
@@ -79,9 +83,13 @@ class NotificationStrategy:
         self, action: Enum, message: str, **kwargs: Any
     ) -> Union[UserNotification, AdminNotif]:
         if isinstance(action, UserNotification.Action):
-            return self.user_factory.create_notification(action, message, **kwargs)
+            return self.user_factory.create_notification(
+                action, message, **kwargs
+            )
         elif isinstance(action, AdminNotif.Action):
-            return self.admin_factory.create_notification(action, message, **kwargs)
+            return self.admin_factory.create_notification(
+                action, message, **kwargs
+            )
 
 
 @lru_cache(maxsize=1)

@@ -21,16 +21,10 @@ from app.models.telegram import (
     InviteLink,
 )
 from app.models.user import UserResponse
-from app.templates import render_template
 from app.utils.share import generate_subscription_template
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="", tags=["Telegram"])
-
-
-@router.get("/")
-async def web_app_init():
-    return HTMLResponse(render_template("web.html"))
 
 
 async def get_db_user(request: Request, db: DBDep):
@@ -42,7 +36,6 @@ async def get_db_user(request: Request, db: DBDep):
         )
 
     data = await request.form()
-    logger.info(f"Webapp init data: {data}")
     try:
         data = safe_parse_webapp_init_data(
             token=bot.token, init_data=data["_auth"]

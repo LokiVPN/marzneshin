@@ -24,6 +24,6 @@ api_router.include_router(system.router, prefix="/api")
 api_router.include_router(user.router, prefix="/api")
 api_router.include_router(notification.router, prefix="/api")
 api_router.include_router(telegram_bot.router, prefix="/bot")
-api_router.include_router(telegram_web_app.router, prefix="/web")
+api_router.include_router(telegram_web_app.router, prefix="/client_api")
 
 __all__ = ["api_router"]

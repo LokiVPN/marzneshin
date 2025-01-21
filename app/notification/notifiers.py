@@ -12,6 +12,8 @@ async def notify(action: Enum, message: str, **kwargs) -> None:
         return
 
     strategy = get_notification_strategy()
-    notification = strategy.create_notification(action=action, message=message, **kwargs)
+    notification = strategy.create_notification(
+        action=action, message=message, **kwargs
+    )
 
     await manager.send_notification(notification)
