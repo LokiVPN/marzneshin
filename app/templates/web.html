@@ -27,7 +27,7 @@
             let formData = new FormData();
             formData.append('_auth', window.Telegram.WebApp.initData);
 
-           fetch('/web/get_me', {
+           fetch('/client_api/get_me', {
                 method: 'POST',
                 body: formData
             }).then(async function (response) {

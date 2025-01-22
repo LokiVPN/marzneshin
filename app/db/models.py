@@ -237,6 +237,12 @@ class User(Base):
             return self.expire_date < datetime.utcnow()
         return False
 
+    @property
+    def remaining_days(self):
+        if self.expire_date:
+            return (self.expire_date - datetime.utcnow()).days
+        return None
+
     @expired.expression
     def expired(cls):
         return and_(

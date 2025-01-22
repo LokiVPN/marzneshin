@@ -147,6 +147,7 @@ class UserResponse(User):
     subscription_url: str
     owner_username: str | None
     traffic_reset_at: datetime | None
+    remaining_days: int | None
 
     model_config = ConfigDict(from_attributes=True)
 
