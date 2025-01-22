@@ -32,10 +32,32 @@ def env_override(value, key):
     return os.getenv(key, value)
 
 
+def pluralize_ru(value: int | float | None, first: str, second: str, third: str):
+    """
+    Склонение слова по числу.
+
+    :param value: Число
+    :param first: Первая форма слова
+    :param second: Вторая форма слова
+    :param third: Третья форма слова
+    """
+    value = abs(int(value))  # Берем модуль числа
+
+    if 11 <= value % 100 <= 19:
+        return third[2]
+    elif value % 10 == 1:
+        return first[0]
+    elif 2 <= value % 10 <= 4:
+        return second[1]
+    else:
+        return third[2]
+
+
 CUSTOM_FILTERS = {
     "yaml": to_yaml,
     "except": exclude_keys,
     "only": only_keys,
     "datetime": datetimeformat,
     "bytesformat": readable_size,
+    "pluralize_ru": pluralize_ru,
 }
