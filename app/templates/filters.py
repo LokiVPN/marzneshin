@@ -41,7 +41,7 @@ def pluralize_ru(value: int | float | None, first: str, second: str, third: str)
     :param second: Вторая форма слова
     :param third: Третья форма слова
     """
-    value = abs(int(value))  # Берем модуль числа
+    value = abs(int(value or 0))  # Берем модуль числа
 
     if 11 <= value % 100 <= 19:
         return third[2]
