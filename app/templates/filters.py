@@ -44,13 +44,13 @@ def pluralize_ru(value: int | float | None, first: str, second: str, third: str)
     value = abs(int(value or 0))  # Берем модуль числа
 
     if 11 <= value % 100 <= 19:
-        return third[2]
+        return third
     elif value % 10 == 1:
-        return first[0]
+        return first
     elif 2 <= value % 10 <= 4:
-        return second[1]
+        return second
     else:
-        return third[2]
+        return third
 
 
 CUSTOM_FILTERS = {
