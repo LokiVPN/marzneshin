@@ -32,7 +32,9 @@ def env_override(value, key):
     return os.getenv(key, value)
 
 
-def pluralize_ru(value: int | float | None, first: str, second: str, third: str):
+def pluralize_ru(
+    value: int | float | None, first: str, second: str, third: str
+):
     """
     Склонение слова по числу.
 

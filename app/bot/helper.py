@@ -1,14 +1,20 @@
 import asyncio
 from datetime import datetime, timedelta
 import logging
-from enum import StrEnum
 
 from aiogram.utils.payload import decode_payload, encode_payload
 from sqlalchemy.orm import Session
 from aiogram import types, Bot
 
 from app import marznode
-from app.config import TELEGRAM_PAYMENT_TOKEN
+from app.config import (
+    TELEGRAM_PAYMENT_TOKEN,
+    FREE_PERIOD_DAYS,
+    DEFAULT_DATA_LIMIT,
+    COST_PER_DAY_RUB,
+    COST_PER_DAY_XTR,
+    FRIEND_SALE_PERCENT,
+)
 from app.db import crud, User
 from app.models.notification import UserNotification
 from app.models.telegram import Currency
@@ -34,9 +40,8 @@ def get_or_create_user(
             is_telegram_premium=tg_user.is_premium or False,
             service_ids=[service.id for service in services],
             expire_strategy=UserExpireStrategy.FIXED_DATE,
-            expire_date=datetime.utcnow()
-            + timedelta(days=2),  # TODO: Get from env
-            data_limit=500 * 1024 * 1024 * 1024,  # TODO: Get from env
+            expire_date=datetime.utcnow() + timedelta(days=FREE_PERIOD_DAYS),
+            data_limit=DEFAULT_DATA_LIMIT * 1024 * 1024 * 1024,
             data_limit_reset_strategy=UserDataUsageResetStrategy.month,
         )
 
@@ -107,14 +112,18 @@ def decode_invoice_payload(payload: str) -> tuple[int, Currency, int]:
     return user_id, currency, duration
 
 
-def get_prices(currency: Currency, duration: int) -> list[types.LabeledPrice]:
-    cost_per_day = 3.5  # TODO: Get from env
-    multiply = 100 if currency == Currency.RUB else 0.5
+def get_prices(
+    currency: Currency, duration: int, isFriend: bool = False
+) -> list[types.LabeledPrice]:
+    cost_per_day = (
+        COST_PER_DAY_RUB if currency == Currency.RUB else COST_PER_DAY_XTR
+    )
+    sale = (100 - FRIEND_SALE_PERCENT if isFriend else 100) / 100
 
     return [
         types.LabeledPrice(
             label=f"Оплата на {plural_days(duration)}",
-            amount=int(cost_per_day * multiply * duration),
+            amount=int(cost_per_day * duration * sale),
         )
     ]
 
@@ -142,9 +151,15 @@ async def create_invoice(
                 title=title,
                 description=description,
                 payload=encode_invoice_payload(user.id, currency, duration),
-                subscription_period=2592000 if is_subscription else None,
+                subscription_period=(
+                    timedelta(days=30).seconds if is_subscription else None
+                ),
                 currency=currency.value,
-                prices=get_prices(currency, duration),
+                prices=get_prices(
+                    currency,
+                    duration,
+                    isFriend=True if user.invited_by else False,
+                ),
                 provider_token=(
                     TELEGRAM_PAYMENT_TOKEN
                     if currency == Currency.RUB

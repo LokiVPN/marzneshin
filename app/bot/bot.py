@@ -26,11 +26,11 @@ from app.bot.helper import (
     decode_invoice_payload,
     create_invoice,
 )
+from app.config import REFERRAL_BONUS_DAYS_PERCENT
 from app.db import crud, User
 from app.db import GetDB
-from app.models.node import NodeStatus
 from app.models.telegram import Currency
-from app.models.user import UserResponse, UserModify
+from app.models.user import UserResponse
 from app.templates import render_template_string
 
 logger = logging.getLogger(__name__)
@@ -230,7 +230,13 @@ async def process_successful_payment(
                 inviter = crud.extend_user_sub(
                     db,
                     inviter,
-                    timedelta(days=int(duration * 0.1)),
+                    timedelta(
+                        days=int(
+                            duration
+                            * (100 - REFERRAL_BONUS_DAYS_PERCENT)
+                            / 100
+                        )
+                    ),
                 )
                 await message.bot.send_message(
                     chat_id=inviter.id,
@@ -243,7 +249,7 @@ async def process_successful_payment(
                     ),
                 )
 
-        await message.bot.delete_message(user_id, message.message_id-1)
+        await message.bot.delete_message(user_id, message.message_id - 1)
     except Exception as e:
         logger.error(e)
         await message.answer("Упс, что-то пошло не так...")
