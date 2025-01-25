@@ -21,6 +21,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
+from app import marznode
 from app.bot.helper import (
     get_or_create_user,
     decode_invoice_payload,
@@ -222,6 +223,7 @@ async def process_successful_payment(
             message.successful_payment.provider_payment_charge_id,
             message.successful_payment.telegram_payment_charge_id,
         )
+        marznode.operations.update_user(user=user_db)
         if user_db.invited_by:
             inviter = crud.get_user_by_id(db, user_db.invited_by)
             if inviter and (
@@ -248,8 +250,8 @@ async def process_successful_payment(
                         },
                     ),
                 )
-
         await message.bot.delete_message(user_id, message.message_id - 1)
+        # TODO: уведомление об реактивации
     except Exception as e:
         logger.error(e)
         await message.answer("Упс, что-то пошло не так...")
