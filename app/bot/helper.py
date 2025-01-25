@@ -115,9 +115,7 @@ def decode_invoice_payload(payload: str) -> tuple[int, Currency, int]:
 def get_prices(
     currency: Currency, duration: int, isFriend: bool = False
 ) -> list[types.LabeledPrice]:
-    cost_per_day = (
-        COST_PER_DAY_RUB if currency == Currency.RUB else COST_PER_DAY_XTR
-    )
+    cost_per_day = COST_PER_DAY_RUB if currency == Currency.RUB else COST_PER_DAY_XTR
     sale = (100 - FRIEND_SALE_PERCENT if isFriend else 100) / 100
 
     return [
@@ -144,6 +142,12 @@ async def create_invoice(
 
     title = "Доступ к VPN"
     description = f"Оплата за использование VPN на {plural_days(duration)}"
+    prices = get_prices(
+        currency,
+        duration,
+        isFriend=True if user.invited_by else False,
+    )
+    logger.info(prices)
 
     if currency in [Currency.XTR, Currency.RUB]:
         if is_link:
@@ -155,11 +159,7 @@ async def create_invoice(
                     timedelta(days=30).seconds if is_subscription else None
                 ),
                 currency=currency.value,
-                prices=get_prices(
-                    currency,
-                    duration,
-                    isFriend=True if user.invited_by else False,
-                ),
+                prices=prices,
                 provider_token=(
                     TELEGRAM_PAYMENT_TOKEN
                     if currency == Currency.RUB
@@ -173,7 +173,7 @@ async def create_invoice(
             description=description,
             payload=encode_invoice_payload(user.id, currency, duration),
             currency=currency.value,
-            prices=get_prices(currency, duration),
+            prices=prices,
             provider_token=(
                 TELEGRAM_PAYMENT_TOKEN if currency == Currency.RUB else None
             ),
