@@ -109,9 +109,6 @@ async def command_start_handler(
     """
     This handler receives messages with `/start` command
     """
-    logger.info(
-        f"User {message.from_user.id} started the bot, {user_db.username}"
-    )
     if not user_db:
         user_db = get_or_create_user(db, message.from_user)
 
