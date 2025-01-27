@@ -147,6 +147,7 @@ async def create_invoice(
         duration,
         isFriend=True if user.invited_by else False,
     )
+    logger.info(f"Prices: {prices}")
 
     if currency in [Currency.XTR, Currency.RUB]:
         if is_link:

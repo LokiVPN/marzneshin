@@ -18,13 +18,6 @@ class PricesResponse(BaseModel):
     XTR: int
 
 
-class CreateInvoice(BaseModel):
-    currency: Currency = Field(Currency.RUB)
-    duration: Annotated[int, Field(ge=1, le=365)] = Field(1)
-    is_subscription: bool = Field(False)
-    is_link: bool = Field(False)
-
-
 class Link(BaseModel):
     link: HttpUrl
 

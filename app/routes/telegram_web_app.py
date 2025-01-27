@@ -3,8 +3,7 @@ from typing import Annotated
 
 from aiogram.utils.deep_linking import create_start_link
 from aiogram.utils.web_app import safe_parse_webapp_init_data
-from fastapi import APIRouter, HTTPException, Depends
-from starlette.requests import Request
+from fastapi import APIRouter, HTTPException, Depends, Form
 from starlette.responses import HTMLResponse
 
 from app.bot.manager import BotManager
@@ -14,7 +13,6 @@ from app.dependencies import DBDep
 from app.db.models import Settings
 from app.models.settings import SubscriptionSettings
 from app.models.telegram import (
-    CreateInvoice,
     InvoiceLink,
     Currency,
     PricesResponse,
@@ -27,7 +25,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="", tags=["Telegram"])
 
 
-async def get_db_user(request: Request, db: DBDep):
+async def get_db_user(db: DBDep, auth: str = Form(alias="_auth", validation_alias="_auth", description="Telegram Init data")):
     bot = await BotManager.get_instance()
     if not bot:
         logger.error("Telegram bot is not initialized.")
@@ -35,10 +33,9 @@ async def get_db_user(request: Request, db: DBDep):
             status_code=500, detail="Telegram bot is not initialized."
         )
 
-    data = await request.form()
     try:
         data = safe_parse_webapp_init_data(
-            token=bot.token, init_data=data["_auth"]
+            token=bot.token, init_data=auth
         )
     except ValueError:
         raise HTTPException(status_code=401, detail="Unauthorized")
@@ -94,9 +91,12 @@ async def personal_link(user: TGUserDep):
 
 @router.post("/invoice", response_model=InvoiceLink)
 async def generate_invoice(
+    duration: Annotated[int, Form(ge=1, le=365, description="Продолжительность в днях")],
     user: TGUserDep,
     db: DBDep,
-    new_invoice: CreateInvoice,
+    currency: Annotated[Currency, Form(description="Валюта")] = Currency.RUB,
+    is_subscription: Annotated[bool, Form(description="Ежемесячная оплата в XTR")] = False,
+    is_link: Annotated[bool, Form(description="Вернуть ссылку или отправить в чате")] = True,
 ):
     """
     Generate an invoice for the user
@@ -108,10 +108,10 @@ async def generate_invoice(
     invoice_link = await create_invoice(
         bot,
         crud.get_user_by_id(db, user.id),
-        new_invoice.currency,
-        new_invoice.duration,
-        new_invoice.is_subscription,
-        new_invoice.is_link,
+        currency,
+        duration,
+        is_subscription,
+        is_link,
     )
 
     return InvoiceLink(link=invoice_link)
