@@ -247,7 +247,7 @@ async def process_successful_payment(
                         },
                     ),
                 )
-        await message.bot.delete_message(user_id, message.message_id - 1)
+        await message.answer("Подписка продлена")
         # TODO: уведомление об реактивации
     except Exception as e:
         logger.error(e)
@@ -302,6 +302,8 @@ async def process_payment_callback(
             await create_invoice(
                 query.bot, user_db, Currency.RUB, callback_data.duration
             )
+            await query.answer("Счет создан")
         except Exception as e:
             logger.error(e)
             await query.answer("Упс, что-то пошло не так...")
+
