@@ -115,7 +115,9 @@ def decode_invoice_payload(payload: str) -> tuple[int, Currency, int]:
 def get_prices(
     currency: Currency, duration: int, isFriend: bool = False
 ) -> list[types.LabeledPrice]:
-    cost_per_day = COST_PER_DAY_RUB if currency == Currency.RUB else COST_PER_DAY_XTR
+    cost_per_day = (
+        COST_PER_DAY_RUB if currency == Currency.RUB else COST_PER_DAY_XTR
+    )
     sale = (100 - FRIEND_SALE_PERCENT if isFriend else 100) / 100
 
     return [
