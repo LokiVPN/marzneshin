@@ -13,9 +13,19 @@ class Currency(str, Enum):
     XTR = "XTR"
 
 
+class Price(BaseModel):
+    duration: int
+    price: int
+    discount_percent: int
+
+    @property
+    def price_with_discount(self):
+        return self.price - (self.price * self.discount_percent) / 100
+
+
 class PricesResponse(BaseModel):
-    RUB: int
-    XTR: int
+    RUB: list[Price]
+    XTR: list[Price]
 
 
 class Link(BaseModel):

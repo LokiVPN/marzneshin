@@ -112,7 +112,10 @@ FREE_PERIOD_DAYS = config("FREE_PERIOD_DAYS", default=5, cast=int)
 DEFAULT_DATA_LIMIT = config("DEFAULT_DATA_LIMIT", default=1024, cast=int)
 COST_PER_DAY_RUB = config("COST_PER_DAY_RUB", default=350, cast=int)
 COST_PER_DAY_XTR = config("COST_PER_DAY_XTR", default=1.5, cast=float)
-FRIEND_SALE_PERCENT = config("FRIEND_SALE_PERCENT", default=10, cast=int)
+FRIEND_SALE_PERCENT = config("FRIEND_SALE_PERCENT", default=5, cast=int)
+SALE_BY_EVERY_THIRD_MONTH = config(
+    "SALE_BY_EVERY_THIRD_MONTH", default=5, cast=int
+)
 REFERRAL_BONUS_DAYS_PERCENT = config(
     "REFERRAL_BONUS_DAYS_PERCENT", default=25, cast=int
 )

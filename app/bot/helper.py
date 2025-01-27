@@ -14,6 +14,7 @@ from app.config import (
     COST_PER_DAY_RUB,
     COST_PER_DAY_XTR,
     FRIEND_SALE_PERCENT,
+    SALE_BY_EVERY_THIRD_MONTH,
 )
 from app.db import crud, User
 from app.models.notification import UserNotification
@@ -112,11 +113,19 @@ def decode_invoice_payload(payload: str) -> tuple[int, Currency, int]:
     return user_id, currency, duration
 
 
+def get_sale_percent(duration: int, isFriend: bool = False) -> int:
+    return SALE_BY_EVERY_THIRD_MONTH * (duration // 90) + (
+        FRIEND_SALE_PERCENT if isFriend else 0
+    )
+
+
 def get_prices(
     currency: Currency, duration: int, isFriend: bool = False
 ) -> list[types.LabeledPrice]:
-    cost_per_day = COST_PER_DAY_RUB if currency == Currency.RUB else COST_PER_DAY_XTR
-    sale = (100 - FRIEND_SALE_PERCENT if isFriend else 100) / 100
+    cost_per_day = (
+        COST_PER_DAY_RUB if currency == Currency.RUB else COST_PER_DAY_XTR
+    )
+    sale = (100 - get_sale_percent(duration, isFriend)) / 100
 
     return [
         types.LabeledPrice(
@@ -147,7 +156,6 @@ async def create_invoice(
         duration,
         isFriend=True if user.invited_by else False,
     )
-    logger.info(f"Prices: {prices}")
 
     if currency in [Currency.XTR, Currency.RUB]:
         if is_link:
